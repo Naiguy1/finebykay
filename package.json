@@ -12,7 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@fontsource/cormorant-garamond": "5.2.0",
+    "@fontsource/cormorant-garamond": "5.3.0",
     "@fontsource/inter": "5.2.0",
     "framer-motion": "12.23.24",
     "lucide-react": "0.468.0",
