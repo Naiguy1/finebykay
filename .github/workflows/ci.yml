@@ -4,77 +4,55 @@ on:
   pull_request:
 permissions:
   contents: read
-  checks: write
 jobs:
   validate:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npm audit --json > dependency-audit.json
-        continue-on-error: true
       - run: npm run lint
       - run: npm run build 2>&1 | tee build.log
         id: build
         shell: bash
-      - uses: actions/github-script@v7
-        if: always() && github.event_name == 'push' && steps.build.outcome != 'skipped'
-        with:
-          script: |
-            const fs = require('fs');
-            const log = fs.existsSync('build.log') ? fs.readFileSync('build.log', 'utf8') : 'Build did not start.';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: context.sha,
-              name: 'Production build report',
-              status: 'completed',
-              conclusion: '${{ steps.build.outcome }}' === 'success' ? 'success' : 'failure',
-              output: { title: 'TypeScript and Vite output', summary: '```text\n' + log.slice(-60000) + '\n```' }
-            });
-            const audit = fs.existsSync('dependency-audit.json') ? JSON.parse(fs.readFileSync('dependency-audit.json', 'utf8')) : { error: 'Audit unavailable' };
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Dependency audit report', status: 'completed',
-              conclusion: !audit.metadata ? 'neutral' : (audit.metadata.vulnerabilities.high + audit.metadata.vulnerabilities.critical > 0 ? 'failure' : audit.metadata.vulnerabilities.total > 0 ? 'neutral' : 'success'),
-              output: { title: 'Dependency audit (triage required)', summary: '```json\n' + JSON.stringify(audit, null, 2).slice(0, 60000) + '\n```' }
-            });
       - name: Check production dependency vulnerabilities
         run: npm audit --omit=dev --audit-level=high
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e 2>&1 | tee browser.log
         id: browser
         shell: bash
-      - uses: actions/github-script@v7
-        if: always() && github.event_name == 'push' && steps.browser.outcome != 'skipped'
-        with:
-          script: |
-            const fs = require('fs');
-            const log = fs.existsSync('browser.log') ? fs.readFileSync('browser.log', 'utf8') : 'Browser tests did not start.';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: context.sha,
-              name: 'Browser test report',
-              status: 'completed',
-              conclusion: '${{ steps.browser.outcome }}' === 'success' ? 'success' : 'failure',
-              output: { title: 'Desktop and mobile browser output', summary: '```text\n' + log.slice(-60000) + '\n```' }
-            });
       - name: Verify production container
         id: container
         shell: bash
         run: |
           trap 'docker rm -f finebykay-ci >/dev/null 2>&1 || true' EXIT
-          docker build -t finebykay-ci .
-          docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci
-          docker exec finebykay-ci nginx -t
-          python3 scripts/check_static_host.py
-      - uses: actions/upload-artifact@v4
+          set -o pipefail
+          {
+            passed=0
+            for attempt in 1 2 3; do
+              docker rm -f finebykay-ci >/dev/null 2>&1 || true
+              if docker build -t finebykay-ci . &&
+                docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci &&
+                docker exec finebykay-ci nginx -t &&
+                python3 scripts/check_static_host.py; then
+                passed=1
+                break
+              fi
+              echo "Container verification attempt $attempt failed."
+              sleep 5
+            done
+            test "$passed" -eq 1
+          } 2>&1 | tee container.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: production-site-and-dependency-lock
@@ -82,5 +60,8 @@ jobs:
             dist/
             package-lock.json
             dependency-audit.json
+            build.log
+            browser.log
+            container.log
             test-results/
           retention-days: 7
