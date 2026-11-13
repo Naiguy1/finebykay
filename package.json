@@ -5,10 +5,10 @@
   "type": "module",
   "engines": { "node": ">=22.12.0" },
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "lint": "eslint . --max-warnings 0",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "vite preview --host 127.0.0.1",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -38,6 +38,6 @@
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
     "typescript-eslint": "8.46.3",
-    "vite": "7.2.2"
+    "vite": "7.3.8"
   }
 }

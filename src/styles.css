@@ -55,6 +55,13 @@ svg { flex-shrink: 0; }
 .hero-strip { position: absolute; left: 50%; top: 0; transform: translateX(-50%); display: flex; gap: clamp(18px, 2.8vw, 44px); width: 115%; align-items: flex-start; }
 .hero-card { width: 20%; height: clamp(275px, 29vw, 440px); flex-shrink: 1; position: relative; overflow: hidden; border-radius: 30px; background: var(--linen); }
 .hero-card img { height: 100%; }
+.wheel-gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.carousel-track { position: absolute; inset: 0; pointer-events: none; }
+.carousel-card { position: absolute; left: 0; top: 0; height: clamp(275px, 29vw, 440px); overflow: hidden; border-radius: 30px; background: var(--linen); will-change: transform; }
+.carousel-card img { height: 100%; }
+.carousel-toolbar { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 18px 5.5vw 0; }
+.carousel-toolbar p { text-align: center; font-size: 11px; color: var(--accent); line-height: 1.7; }
+.carousel-toolbar p span { display: block; font-size: 9px; color: var(--muted); }
 .hero-card-0 { margin-top: 0; rotate: 5deg; }
 .hero-card-1 { margin-top: 26px; rotate: 3deg; }
 .hero-card-2 { margin-top: 49px; }

@@ -11,7 +11,9 @@ npm ci
 npm run dev
 ```
 
-Vite prints the local development URL. Direct dependencies and the resolved dependency tree are pinned in `package.json` and `package-lock.json`. Motion's DOM/utilities packages are pinned together because later transitive releases changed exports. Use `npm ci` for reproducible installs. When intentionally changing dependencies, use `npm install` and commit the updated lockfile. CI also uploads the lockfile with the production build.
+Vite prints the local development URL. Development and preview servers bind to localhost by default. Use production static hosting for public traffic.
+
+Direct dependencies and the resolved dependency tree are pinned in `package.json` and `package-lock.json`. Motion's DOM/utilities packages are pinned together because later transitive releases changed exports. Use `npm ci` for reproducible installs. When intentionally changing dependencies, use `npm install` and commit the updated lockfile. CI also uploads the lockfile with the production build.
 
 ```bash
 npm run lint
@@ -21,7 +23,7 @@ npm run test:e2e
 npm run preview
 ```
 
-`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, and reduced motion. The workflow does not deploy the site.
+`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch-device fallback, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
 
 ## Replace the sample work
 
@@ -57,6 +59,7 @@ Sample image provenance and generation prompts: [`public/media/ASSETS.md`](publi
 - Anchors: `#work`, `#services`, `#about`, `#contact`.
 - Motion: 0.7–1.1 second entrances, custom `[0.22, 1, 0.36, 1]` easing, scroll-linked hero depth, magnetic links, image settling, and a shared category pill. The lightbox uses a shorter opacity crossfade to keep navigation comfortable.
 - Reduced motion: OS preferences disable scroll animation, parallax, magnetic movement, layout motion, image scaling, and long transitions.
+- Desktop hero carousel: on screens at least 1024px wide with a fine hover pointer, wheel over the images to cycle seamlessly in either direction. Arrow buttons/keys also work. Move the pointer away or press Escape to restore page scrolling; Ctrl/Meta wheel zoom is left to the browser. Phones and touch tablets keep the original static/parallax strip. Reduced motion removes easing and parallax.
 - Lightbox: native modal dialog for focus trapping and background inertness; focus returns to the opening card; Escape closes; arrow keys and horizontal swipes move through the current category; zoom enables image panning. Optional video supports native controls and never autoplays.
 - Contact: Instagram only. There is no booking widget or calendar integration.
 
