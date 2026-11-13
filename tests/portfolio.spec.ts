@@ -16,6 +16,8 @@ test('page renders local assets, anchors, and fits the viewport', async ({ page 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   expect(errors).toEqual([]);
   await page.evaluate(() => window.scrollTo(0, 0));
+  await page.setViewportSize(testInfo.project.name === 'mobile' ? { width: 390, height: 1000 } : { width: 1280, height: 1100 });
+  await page.screenshot({ path: testInfo.outputPath(`review-${testInfo.project.name}.jpg`), type: 'jpeg', quality: 25, scale: 'css' });
   await page.screenshot({ path: testInfo.outputPath('homepage.png'), fullPage: true });
 });
 

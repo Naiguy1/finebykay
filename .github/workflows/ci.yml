@@ -64,6 +64,19 @@ jobs:
               conclusion: '${{ steps.browser.outcome }}' === 'success' ? 'success' : 'failure',
               output: { title: 'Desktop and mobile browser output', summary: '```text\n' + log.slice(-60000) + '\n```' }
             });
+            const previews = fs.existsSync('test-results') ? fs.readdirSync('test-results', { recursive: true }).filter(p => /review-(desktop|mobile)\.jpg$/.test(p)) : [];
+            for (const preview of previews) {
+              const data = fs.readFileSync('test-results/' + preview).toString('base64');
+              const kind = preview.includes('review-desktop') ? 'desktop' : 'mobile';
+              const total = Math.ceil(data.length / 50000);
+              for (let index = 0; index < total; index++) {
+                await github.rest.checks.create({
+                  owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
+                  name: `Visual preview ${kind} ${index + 1}/${total}`, status: 'completed', conclusion: 'neutral',
+                  output: { title: 'Rendered browser preview', summary: 'JPEG preview for independent visual review; original is retained in the browser artifacts.', text: data.slice(index * 50000, (index + 1) * 50000) }
+                });
+              }
+            }
       - name: Verify production container
         id: container
         shell: bash
