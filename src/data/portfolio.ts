@@ -15,7 +15,7 @@ export interface PortfolioSet {
   video?: string;
 }
 
-// Sample concepts using generated imagery, not photographs of Kay's client work.
+// Sample concepts using generated imagery, not photographs of Kalisa's client work.
 // Replace image paths + metadata here when adding original work to public/media/.
 export const portfolio: readonly PortfolioSet[] = [
   { id: 'petal-study', title: 'A study in petals', category: 'Intricate Art', image: '/media/rose.webp', alt: 'Sheer blush almond nails with a tiny burgundy botanical accent on ivory silk', tags: ['Hand-painted botanical', 'Sheer blush'], objectPosition: '50% 50%' },
@@ -32,7 +32,7 @@ export const studio = {
   instagram: 'https://instagram.com/finebykay',
   handle: '@finebykay',
   image: '/media/studio.webp',
-  // Editable placeholder studio narrative. Replace with Kay's own introduction.
+  // Editable placeholder studio narrative. Replace with Kalisa's own introduction.
   paragraphs: [
     'I believe getting your nails done should feel like taking a breath. A little time set aside, a thoughtful conversation, and something beautiful to carry into your everyday.',
     'My approach starts with healthy natural nails and careful, clean preparation. From a barely-there finish to a tiny hand-painted world, every set is considered, personal, and made slowly — just for you.',

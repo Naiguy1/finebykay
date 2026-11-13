@@ -20,7 +20,7 @@ export function Hero() {
   return <section ref={section} className="hero" aria-labelledby="hero-title">
     <div className="hero-copy">
       <Reveal><p className="eyebrow justify-center"><span className="status-dot" />Private nail studio · By appointment</p></Reveal>
-      <Reveal delay={0.1}><h1 id="hero-title">Nail Art <em>By Kay</em></h1></Reveal>
+      <Reveal delay={0.1}><h1 id="hero-title">Nail Art <em>by Kalisa</em></h1></Reveal>
       <Reveal delay={0.2}><p className="hero-handle">@finebykay</p></Reveal>
       <Reveal delay={0.3}><MagneticLink href="#work" className="button button-burgundy">Explore the Lookbook <ArrowDown size={16} aria-hidden="true" /></MagneticLink></Reveal>
     </div>

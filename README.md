@@ -25,7 +25,7 @@ npm run preview
 
 ## Replace the sample work
 
-**The included nail photos and studio image are AI-generated sample imagery, not Kay's client work or a photograph of her studio.** Six demonstration entries reuse three nail images so you can see filtering and layout. Replace the images and placeholder About narrative before presenting this as a portfolio of actual work. No location, availability schedule, qualifications, or booking promises have been invented.
+**The included nail photos and studio image are AI-generated sample imagery, not Kalisa's client work or a photograph of her studio.** Six demonstration entries reuse three nail images so you can see filtering and layout. Replace the images and placeholder About narrative before presenting this as a portfolio of actual work. No location, availability schedule, qualifications, or booking promises have been invented.
 
 1. Put original photos in **`public/media/`**, e.g. `public/media/botanical-gel.webp`. Use a roughly 3:4 portrait crop, ideally 1200 × 1600px. WebP/JPEG is recommended, around 150–400KB for the grid. Keep source originals separately.
 2. Edit **`src/data/portfolio.ts`**. Add or update a typed entry:

@@ -5,7 +5,7 @@ test('page renders local assets, anchors, and fits the viewport', async ({ page 
   page.on('pageerror', (error) => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nail Art By Kay');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nail Art by Kalisa');
   await page.getByRole('link', { name: 'Explore the Lookbook' }).click();
   await expect(page).toHaveURL(/#work$/);
   await expect(page.locator('.portfolio-card')).toHaveCount(6);
