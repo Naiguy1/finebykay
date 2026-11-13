@@ -8,10 +8,6 @@ jobs:
   validate:
     permissions:
       contents: read
-    outputs:
-      build-outcome: ${{ steps.build.outcome }}
-      browser-outcome: ${{ steps.browser.outcome }}
-      container-outcome: ${{ steps.container.outcome }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,7 +20,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --json > dependency-audit.json
-        continue-on-error: true
       - run: npm run lint
       - run: npm run build 2>&1 | tee build.log
         id: build
@@ -60,57 +55,3 @@ jobs:
             container.log
             test-results/
           retention-days: 7
-
-  report:
-    if: ${{ always() && github.event_name == 'push' }}
-    needs: validate
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      checks: write
-    steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        if: always()
-        with:
-          name: production-site-and-dependency-lock
-          path: reports
-      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        if: always()
-        env:
-          BUILD_OUTCOME: ${{ needs.validate.outputs.build-outcome }}
-          BROWSER_OUTCOME: ${{ needs.validate.outputs.browser-outcome }}
-          CONTAINER_OUTCOME: ${{ needs.validate.outputs.container-outcome }}
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            const fs = require('node:fs');
-            const read = (path, fallback) => fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : fallback;
-            const conclusion = (outcome) => outcome === 'success' ? 'success' : outcome === 'skipped' ? 'neutral' : 'failure';
-            const build = read('reports/build.log', 'Build did not start.');
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Production build report', status: 'completed',
-              conclusion: conclusion(process.env.BUILD_OUTCOME),
-              output: { title: 'TypeScript and Vite output', summary: build.slice(-60000) }
-            });
-            const audit = JSON.parse(read('reports/dependency-audit.json', '{"error":"Audit unavailable"}'));
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Dependency audit report', status: 'completed',
-              conclusion: !audit.metadata ? 'neutral' : (audit.metadata.vulnerabilities.high + audit.metadata.vulnerabilities.critical > 0 ? 'failure' : audit.metadata.vulnerabilities.total > 0 ? 'neutral' : 'success'),
-              output: { title: 'Dependency audit', summary: JSON.stringify(audit, null, 2).slice(0, 60000) }
-            });
-            const browser = read('reports/browser.log', 'Browser tests did not start.');
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Browser test report', status: 'completed',
-              conclusion: conclusion(process.env.BROWSER_OUTCOME),
-              output: { title: 'Desktop and mobile browser output', summary: browser.slice(-60000) }
-            });
-            const container = read('reports/container.log', 'Production container verification did not start.');
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Production container report', status: 'completed',
-              conclusion: conclusion(process.env.CONTAINER_OUTCOME),
-              output: { title: 'Docker and Nginx verification', summary: container.slice(-60000) }
-            });
