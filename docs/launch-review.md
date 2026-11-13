@@ -13,11 +13,11 @@ Two independent reviewers assessed security and design/accessibility while the d
 | Keyboard zoom | The zoomed viewport is focusable and supports arrow-key panning; normal gallery navigation resumes after zooming out. |
 | Development server | Vite was updated from 7.2.2 to 7.3.8, with a regenerated lockfile. Development and preview bind to localhost by default. |
 | Static response headers | Hashed assets now retain nosniff, referrer, frame, Content Security Policy, and Permissions Policy headers despite their location-specific cache header. |
-| Docker build context | Environment files, npm credentials, and common private-key filenames are excluded. No embedded credentials or private studio address were found in the reviewed source. |
+| Docker build context and base images | Environment files and credentials are excluded from the build context. Both base images are pinned by multi-platform digest. Dependabot checks Docker, npm, and GitHub Actions references weekly. |
 
 The Vite issue affects an explicitly network-exposed development server, not the deployed Nginx static runtime. See the [official advisory](https://github.com/vitejs/vite/security/advisories/GHSA-p4f5-76q4-ffq7). Nginx's header inheritance behavior is documented [here](https://nginx.org/en/docs/http/ngx_http_headers_module.html).
 
-## Residual dependency finding
+## Dependency advisory remediation
 
 The full npm audit identified seven moderate entries through the development-only TypeScript ESLint/minimatch chain. A package-scoped override now pins only that toolchain's minimatch to patched version 11.0.1; unrelated consumers keep their existing compatible versions. The lockfile records the isolated dependency tree. CI verifies clean installation, lint, and dependency audit. The deployed image contains static build output, not this development toolchain.
 
