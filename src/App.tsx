@@ -7,5 +7,5 @@ import { About } from './components/About';
 import { Contact } from './components/Contact';
 
 export default function App() {
-  return <MotionConfig reducedMotion="user" transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}><Header /><main id="main"><Hero /><Lookbook /><Services /><About /></main><Contact /></MotionConfig>;
+  return <MotionConfig reducedMotion="user" transition={{ type: 'tween', duration: 0.9, ease: [0.22, 1, 0.36, 1] }}><Header /><main id="main"><Hero /><Lookbook /><Services /><About /></main><Contact /></MotionConfig>;
 }
