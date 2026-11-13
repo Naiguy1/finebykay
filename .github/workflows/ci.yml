@@ -4,13 +4,19 @@ on:
   pull_request:
 permissions:
   contents: read
-  checks: write
 jobs:
   validate:
+    permissions:
+      contents: read
+    outputs:
+      build-outcome: ${{ steps.build.outcome }}
+      browser-outcome: ${{ steps.browser.outcome }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -22,49 +28,12 @@ jobs:
       - run: npm run build 2>&1 | tee build.log
         id: build
         shell: bash
-      - uses: actions/github-script@v7
-        if: always() && github.event_name == 'push' && steps.build.outcome != 'skipped'
-        with:
-          script: |
-            const fs = require('fs');
-            const log = fs.existsSync('build.log') ? fs.readFileSync('build.log', 'utf8') : 'Build did not start.';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: context.sha,
-              name: 'Production build report',
-              status: 'completed',
-              conclusion: '${{ steps.build.outcome }}' === 'success' ? 'success' : 'failure',
-              output: { title: 'TypeScript and Vite output', summary: '```text\n' + log.slice(-60000) + '\n```' }
-            });
-            const audit = fs.existsSync('dependency-audit.json') ? JSON.parse(fs.readFileSync('dependency-audit.json', 'utf8')) : { error: 'Audit unavailable' };
-            await github.rest.checks.create({
-              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
-              name: 'Dependency audit report', status: 'completed',
-              conclusion: !audit.metadata ? 'neutral' : (audit.metadata.vulnerabilities.high + audit.metadata.vulnerabilities.critical > 0 ? 'failure' : audit.metadata.vulnerabilities.total > 0 ? 'neutral' : 'success'),
-              output: { title: 'Dependency audit (triage required)', summary: '```json\n' + JSON.stringify(audit, null, 2).slice(0, 60000) + '\n```' }
-            });
       - name: Check production dependency vulnerabilities
         run: npm audit --omit=dev --audit-level=high
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e 2>&1 | tee browser.log
         id: browser
         shell: bash
-      - uses: actions/github-script@v7
-        if: always() && github.event_name == 'push' && steps.browser.outcome != 'skipped'
-        with:
-          script: |
-            const fs = require('fs');
-            const log = fs.existsSync('browser.log') ? fs.readFileSync('browser.log', 'utf8') : 'Browser tests did not start.';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: context.sha,
-              name: 'Browser test report',
-              status: 'completed',
-              conclusion: '${{ steps.browser.outcome }}' === 'success' ? 'success' : 'failure',
-              output: { title: 'Desktop and mobile browser output', summary: '```text\n' + log.slice(-60000) + '\n```' }
-            });
       - name: Verify production container
         id: container
         shell: bash
@@ -82,5 +51,53 @@ jobs:
             dist/
             package-lock.json
             dependency-audit.json
+            build.log
+            browser.log
             test-results/
           retention-days: 7
+
+  report:
+    if: ${{ always() && github.event_name == 'push' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      checks: write
+    steps:
+      - uses: actions/download-artifact@v4
+        if: always()
+        with:
+          name: production-site-and-dependency-lock
+          path: reports
+      - uses: actions/github-script@v7
+        if: always()
+        env:
+          BUILD_OUTCOME: ${{ needs.validate.outputs.build-outcome }}
+          BROWSER_OUTCOME: ${{ needs.validate.outputs.browser-outcome }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('node:fs');
+            const read = (path, fallback) => fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : fallback;
+            const conclusion = (outcome) => outcome === 'success' ? 'success' : outcome === 'skipped' ? 'neutral' : 'failure';
+            const build = read('reports/build.log', 'Build did not start.');
+            await github.rest.checks.create({
+              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
+              name: 'Production build report', status: 'completed',
+              conclusion: conclusion(process.env.BUILD_OUTCOME),
+              output: { title: 'TypeScript and Vite output', summary: build.slice(-60000) }
+            });
+            const audit = JSON.parse(read('reports/dependency-audit.json', '{"error":"Audit unavailable"}'));
+            await github.rest.checks.create({
+              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
+              name: 'Dependency audit report', status: 'completed',
+              conclusion: !audit.metadata ? 'neutral' : (audit.metadata.vulnerabilities.high + audit.metadata.vulnerabilities.critical > 0 ? 'failure' : audit.metadata.vulnerabilities.total > 0 ? 'neutral' : 'success'),
+              output: { title: 'Dependency audit', summary: JSON.stringify(audit, null, 2).slice(0, 60000) }
+            });
+            const browser = read('reports/browser.log', 'Browser tests did not start.');
+            await github.rest.checks.create({
+              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
+              name: 'Browser test report', status: 'completed',
+              conclusion: conclusion(process.env.BROWSER_OUTCOME),
+              output: { title: 'Desktop and mobile browser output', summary: browser.slice(-60000) }
+            });

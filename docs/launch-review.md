@@ -12,16 +12,14 @@ Two independent reviewers assessed security and design/accessibility while the d
 | Filtering | Stable selected-set IDs prevent an exiting card's stale numeric index from opening an invalid lightbox after filtering. |
 | Keyboard zoom | The zoomed viewport is focusable and supports arrow-key panning; normal gallery navigation resumes after zooming out. |
 | Development server | Vite was updated from 7.2.2 to 7.3.8, with a regenerated lockfile. Development and preview bind to localhost by default. |
-| Static response headers | Hashed assets now retain nosniff, referrer, and frame policies despite their location-specific cache header. |
+| Static response headers | Hashed assets now retain nosniff, referrer, frame, Content Security Policy, and Permissions Policy headers despite their location-specific cache header. |
 | Docker build context | Environment files, npm credentials, and common private-key filenames are excluded. No embedded credentials or private studio address were found in the reviewed source. |
 
 The Vite issue affects an explicitly network-exposed development server, not the deployed Nginx static runtime. See the [official advisory](https://github.com/vitejs/vite/security/advisories/GHSA-p4f5-76q4-ffq7). Nginx's header inheritance behavior is documented [here](https://nginx.org/en/docs/http/ngx_http_headers_module.html).
 
 ## Residual dependency finding
 
-The full npm audit reports **seven moderate, zero high, and zero critical findings**, all through the development-only TypeScript ESLint/minimatch chain. These are not seven separate runtime flaws. The underlying [minimatch advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249) concerns denial of service from attacker-controlled glob patterns.
-
-At review time, the latest stable TypeScript ESLint release still uses the affected minimatch major. The compatible upstream dependency change is not yet in a stable release. Retain the working pin and lockfile rather than applying an untested major override or an unreleased package version. Review this finding again when a stable upstream fix is available. The deployed image contains static build output, not this development toolchain.
+The full npm audit identified seven moderate entries through the development-only TypeScript ESLint/minimatch chain. A package-scoped override now pins only that toolchain's minimatch to patched version 11.0.1; unrelated consumers keep their existing compatible versions. The lockfile records the isolated dependency tree. CI verifies clean installation, lint, and dependency audit. The deployed image contains static build output, not this development toolchain.
 
 ## Content and deployment follow-up
 
@@ -34,6 +32,6 @@ At review time, the latest stable TypeScript ESLint release still uses the affec
 
 The repository CI runs strict TypeScript, ESLint, a production build, Chromium desktop/mobile interaction tests, a production dependency audit, and a production Docker image check. Browser checks cover wheel movement/reversal, complete loops, keyboard controls, zoom-gesture passthrough, Escape/outside scrolling, resize/touch fallback, reduced motion, gallery race conditions, focus restoration, and zoom panning. It also checks the heading at 320px with enlarged text.
 
-The Docker check runs `nginx -t` and requests real generated assets, HTML, and a missing asset to verify response headers, MIME handling, 404 behavior, and immutable caching. Full dependency-audit output and production/browser artifacts are retained by CI. Review [the checks for the deployed revision](https://github.com/Naiguy1/finebykay/actions) rather than assuming an earlier passing run validates a later change.
+The Docker check runs `nginx -t` and requests real generated assets, HTML, and a missing asset to verify response headers, MIME handling, 404 behavior, and immutable caching, including Content Security Policy and Permissions Policy. Desktop-only carousel tests are discovered only in the desktop project, so the browser matrix runs without skipped cases. Full dependency-audit output and production/browser artifacts are retained by CI. Review [the checks for the deployed revision](https://github.com/Naiguy1/finebykay/actions) rather than assuming an earlier passing run validates a later change.
 
 Rendered Chromium desktop and mobile-size header/hero previews were independently inspected. No obvious overlap, broken media, clipped title, or carousel framing blocker was found; the desktop instruction text was enlarged slightly after review. Lower sections were reviewed from source. The reviewers did not conduct penetration testing, a live TLS review, a container-image CVE scan, Safari/Firefox testing, or physical-device inspection. Chromium results do not establish compatibility or visual approval on other browsers/devices.
