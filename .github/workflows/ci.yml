@@ -11,6 +11,7 @@ jobs:
     outputs:
       build-outcome: ${{ steps.build.outcome }}
       browser-outcome: ${{ steps.browser.outcome }}
+      container-outcome: ${{ steps.container.outcome }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -39,10 +40,13 @@ jobs:
         shell: bash
         run: |
           trap 'docker rm -f finebykay-ci >/dev/null 2>&1 || true' EXIT
-          docker build -t finebykay-ci .
-          docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci
-          docker exec finebykay-ci nginx -t
-          python3 scripts/check_static_host.py
+          set -o pipefail
+          {
+            docker build -t finebykay-ci .
+            docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci
+            docker exec finebykay-ci nginx -t
+            python3 scripts/check_static_host.py
+          } 2>&1 | tee container.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -53,6 +57,7 @@ jobs:
             dependency-audit.json
             build.log
             browser.log
+            container.log
             test-results/
           retention-days: 7
 
@@ -74,6 +79,7 @@ jobs:
         env:
           BUILD_OUTCOME: ${{ needs.validate.outputs.build-outcome }}
           BROWSER_OUTCOME: ${{ needs.validate.outputs.browser-outcome }}
+          CONTAINER_OUTCOME: ${{ needs.validate.outputs.container-outcome }}
         with:
           github-token: ${{ github.token }}
           script: |
@@ -100,4 +106,11 @@ jobs:
               name: 'Browser test report', status: 'completed',
               conclusion: conclusion(process.env.BROWSER_OUTCOME),
               output: { title: 'Desktop and mobile browser output', summary: browser.slice(-60000) }
+            });
+            const container = read('reports/container.log', 'Production container verification did not start.');
+            await github.rest.checks.create({
+              owner: context.repo.owner, repo: context.repo.repo, head_sha: context.sha,
+              name: 'Production container report', status: 'completed',
+              conclusion: conclusion(process.env.CONTAINER_OUTCOME),
+              output: { title: 'Docker and Nginx verification', summary: container.slice(-60000) }
             });
