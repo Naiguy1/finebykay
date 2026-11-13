@@ -36,7 +36,6 @@ test('desktop buttons and keyboard loop through a complete sequence in both dire
   await expect(carousel).toHaveAttribute('data-active-set', first!);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 
-  const card = carousel.locator('.carousel-card').nth(2);
   const activeBeforeZoomGesture = await carousel.getAttribute('data-active-set');
   // Pinch/browser zoom gestures must not be cancelled by our wheel listener.
   const passesZoom = await carousel.evaluate((element) => element.dispatchEvent(new WheelEvent('wheel', { deltaY: 300, ctrlKey: true, bubbles: true, cancelable: true })));
