@@ -14,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - run: npm run lint
       - run: npm run build 2>&1 | tee build.log
         id: build
@@ -24,9 +25,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const zlib = require('zlib');
             const log = fs.existsSync('build.log') ? fs.readFileSync('build.log', 'utf8') : 'Build did not start.';
-            const lock = fs.existsSync('package-lock.json') ? zlib.gzipSync(fs.readFileSync('package-lock.json')).toString('base64') : '';
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -34,7 +33,7 @@ jobs:
               name: 'Production build report',
               status: 'completed',
               conclusion: '${{ steps.build.outcome }}' === 'success' ? 'success' : 'failure',
-              output: { title: 'TypeScript and Vite output', summary: '```text\n' + log.slice(-20000) + '\n```\n<details><summary>Dependency lock snapshot (gzip/base64)</summary>\n\n```text\n' + lock + '\n```\n</details>' }
+              output: { title: 'TypeScript and Vite output', summary: '```text\n' + log.slice(-60000) + '\n```' }
             });
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e 2>&1 | tee browser.log
