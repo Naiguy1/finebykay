@@ -12,7 +12,7 @@ test('page renders local assets, anchors, and fits the viewport', async ({ page 
   for (const image of await page.locator('img[loading="lazy"]').all()) await image.scrollIntoViewIfNeeded();
   await page.locator('#contact').scrollIntoViewIfNeeded();
   await expect(page.getByRole('link', { name: 'Say hello to @finebykay' })).toHaveAttribute('href', 'https://instagram.com/finebykay');
-  await expect.poll(() => page.locator('img').evaluateAll((images) => images.every((image) => image.complete && image.naturalWidth > 0))).toBeTruthy();
+  await expect.poll(() => page.locator('img').evaluateAll((images) => images.every((image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0))).toBeTruthy();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   expect(errors).toEqual([]);
   await page.evaluate(() => window.scrollTo(0, 0));
