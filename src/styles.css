@@ -175,7 +175,7 @@ svg { flex-shrink: 0; }
   .mobile-nav a { font-family: var(--font-display); font-size: 30px; padding: 10px 0; }
   .hero-copy { padding-top: 54px; }
   .hero-copy .eyebrow { font-size: 8px; gap: 8px; letter-spacing: .14em; }
-  .hero-copy h1 { font-size: clamp(42px, 10.5vw, 64px); margin-top: 26px; white-space: nowrap; }
+  .hero-copy h1 { font-size: clamp(42px, 10.5vw, 64px); margin-top: 26px; white-space: normal; }
   .hero-handle { font-size: 32px; margin: 14px 0 27px; }
   .button { min-height: 50px; padding: 16px 22px; font-size: 10px; gap: 21px; }
   .hero-gallery { margin-top: 41px; height: 307px; }

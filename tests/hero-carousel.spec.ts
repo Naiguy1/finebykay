@@ -80,3 +80,20 @@ test('desktop motion remains bounded under repeated wheel input and disables whe
   await expect(page.locator('.wheel-gallery')).toHaveCount(0);
   await expect(page.locator('.hero-strip .hero-card')).toHaveCount(5);
 });
+
+test('the full headline fits at 320px with enlarged text', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  const heading = page.getByRole('heading', { level: 1 });
+  await heading.evaluate((element) => { element.style.fontSize = `${parseFloat(getComputedStyle(element).fontSize) * 2}px`; });
+  const bounds = await heading.evaluate((element) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const rect = range.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, viewport: innerWidth };
+  });
+  expect(bounds.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.right).toBeLessThanOrEqual(bounds.viewport);
+});
