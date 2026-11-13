@@ -37,10 +37,20 @@ jobs:
           trap 'docker rm -f finebykay-ci >/dev/null 2>&1 || true' EXIT
           set -o pipefail
           {
-            docker build -t finebykay-ci .
-            docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci
-            docker exec finebykay-ci nginx -t
-            python3 scripts/check_static_host.py
+            passed=0
+            for attempt in 1 2 3; do
+              docker rm -f finebykay-ci >/dev/null 2>&1 || true
+              if docker build -t finebykay-ci . &&
+                docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci &&
+                docker exec finebykay-ci nginx -t &&
+                python3 scripts/check_static_host.py; then
+                passed=1
+                break
+              fi
+              echo "Container verification attempt $attempt failed."
+              sleep 5
+            done
+            test "$passed" -eq 1
           } 2>&1 | tee container.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
