@@ -28,6 +28,11 @@ test('filter, keyboard lightbox navigation, zoom, focus trap and restore', async
   await card.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Close lookbook' })).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button', { name: 'Zoom in', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button', { name: 'Close lookbook' })).toBeFocused();
   await expect(dialog.getByRole('heading')).toHaveText('Soft light');
   await page.keyboard.press('ArrowRight');
   await expect(dialog.getByRole('heading')).toHaveText('Linen notes');

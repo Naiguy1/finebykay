@@ -23,6 +23,20 @@ export function Lightbox({ sets, index, onNavigate, onClose }: LightboxProps) {
   const navigate = (next: number) => { setZoomed(false); onNavigate((next + sets.length) % sets.length); };
 
   return createPortal(<dialog ref={dialog} className="lightbox" aria-labelledby="lightbox-title" aria-describedby="lightbox-instructions" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }} onKeyDown={(event) => {
+    if (event.key === 'Tab') {
+      const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], video[controls], [tabindex]:not([tabindex="-1"])')).filter((element) => element.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !event.currentTarget.contains(active))) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && (active === last || !event.currentTarget.contains(active))) {
+        event.preventDefault();
+        first?.focus();
+      }
+      return;
+    }
     if (event.target instanceof HTMLVideoElement) return;
     if (event.key === 'ArrowRight') { event.preventDefault(); navigate(index + 1); }
     if (event.key === 'ArrowLeft') { event.preventDefault(); navigate(index - 1); }
