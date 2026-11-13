@@ -37,7 +37,24 @@ jobs:
               output: { title: 'TypeScript and Vite output', summary: '```text\n' + log.slice(-20000) + '\n```\n<details><summary>Dependency lock snapshot (gzip/base64)</summary>\n\n```text\n' + lock + '\n```\n</details>' }
             });
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e 2>&1 | tee browser.log
+        id: browser
+        shell: bash
+      - uses: actions/github-script@v7
+        if: always() && github.event_name == 'push' && steps.browser.outcome != 'skipped'
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.existsSync('browser.log') ? fs.readFileSync('browser.log', 'utf8') : 'Browser tests did not start.';
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: context.sha,
+              name: 'Browser test report',
+              status: 'completed',
+              conclusion: '${{ steps.browser.outcome }}' === 'success' ? 'success' : 'failure',
+              output: { title: 'Desktop and mobile browser output', summary: '```text\n' + log.slice(-60000) + '\n```' }
+            });
       - uses: actions/upload-artifact@v4
         if: always()
         with:
