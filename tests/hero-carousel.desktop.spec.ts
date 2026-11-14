@@ -44,7 +44,7 @@ test('desktop buttons and keyboard loop through a complete sequence in both dire
 });
 
 
-test('desktop motion remains bounded under repeated wheel input and disables when resized', async ({ page }) => {  await page.goto('/');
+test('desktop motion remains bounded and resizing releases wheel scrolling', async ({ page }) => {  await page.goto('/');
   const carousel = page.getByRole('region', { name: 'Signature nail sets' });
   await carousel.scrollIntoViewIfNeeded();
   const before = (await carousel.locator('.carousel-card').nth(2).boundingBox())!.x;
@@ -54,6 +54,10 @@ test('desktop motion remains bounded under repeated wheel input and disables whe
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   await page.setViewportSize({ width: 600, height: 800 });
   await expect(page.locator('.wheel-gallery')).toHaveCount(0);
-  await expect(page.locator('.hero-strip .hero-card')).toHaveCount(5);
+  await expect(carousel).toBeVisible();
+  const active = await carousel.getAttribute('data-active-set');
+  const native = await carousel.evaluate((element) => element.dispatchEvent(new WheelEvent('wheel', { deltaY: 300, bubbles: true, cancelable: true })));
+  expect(native).toBeTruthy();
+  await expect(carousel).toHaveAttribute('data-active-set', active!);
+  await expect(page.getByRole('button', { name: 'Next signature set' })).toBeVisible();
 });
-
