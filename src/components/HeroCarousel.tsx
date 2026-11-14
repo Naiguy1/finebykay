@@ -10,6 +10,7 @@ import type { MotionValue } from 'framer-motion';
 import { ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { heroSets } from '../data/portfolio';
 import type { PortfolioSet } from '../data/portfolio';
+import { useDesktopCarousel } from '../hooks/useDesktopCarousel';
 
 const wrap = (value: number, length: number) => ((value % length) + length) % length;
 
@@ -29,7 +30,7 @@ function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
   const x = useTransform(offset, (value) => wrap((index - 2) * step + (viewport - width) / 2 - value + step, period) - step);
   const y = useTransform(() => {
     const distance = Math.min(Math.abs(x.get() + width / 2 - viewport / 2) / (step * 2), 1);
-    return 49 * (1 - distance) - (reduced ? 0 : progress.get() * 25);
+    return (viewport <= 640 ? 34 : 49) * (1 - distance) - (reduced ? 0 : progress.get() * 25);
   });
   const rotate = useTransform(x, (value) => Math.max(-5, Math.min(5, (viewport / 2 - value - width / 2) / (step * 2) * 5)));
 
@@ -53,7 +54,9 @@ function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
 }
 
 export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
+  const wheelEnabled = useDesktopCarousel();
   const region = useRef<HTMLDivElement>(null);
+  const touch = useRef<{ id: number; x: number; y: number; axis: 'horizontal' | 'vertical' | null } | null>(null);
   const target = useRef(0);
   const released = useRef(false);
   const hovered = useRef(false);
@@ -62,9 +65,11 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
   const offset = useMotionValue(0);
   const [viewport, setViewport] = useState(() => window.innerWidth);
   const [active, setActive] = useState(2);
-  const gap = Math.min(44, Math.max(18, viewport * 0.028));
-  const width = (viewport * 1.15 - gap * 4) / 5;
+  const gap = viewport <= 640 ? 15 : Math.min(44, Math.max(18, viewport * 0.028));
+  const stripRatio = viewport <= 640 ? 2.18 : viewport <= 1000 ? 1.35 : 1.15;
+  const width = (viewport * stripRatio - gap * 4) / 5;
   const step = width + gap;
+  const previousStep = useRef(step);
 
   useMotionValueEvent(offset, 'change', (value) => {
     const next = wrap(2 + Math.round(value / step), heroSets.length);
@@ -103,6 +108,12 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
   }, [offset, reduced]);
 
   useEffect(() => {
+    // Retain the current set and any in-flight movement when the layout changes.
+    const ratio = step / previousStep.current;
+    previousStep.current = step;
+    target.current *= ratio;
+    offset.set(offset.get() * ratio);
+    touch.current = null;
     setActive(wrap(2 + Math.round(offset.get() / step), heroSets.length));
   }, [offset, step]);
 
@@ -124,7 +135,7 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
 
   useEffect(() => {
     const element = region.current;
-    if (!element) return;
+    if (!element || !wheelEnabled) return;
     const onWheel = (event: WheelEvent) => {
       if (released.current || event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.target instanceof Element && event.target.closest('a, button, video')) return;
@@ -137,7 +148,7 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
     };
     element.addEventListener('wheel', onWheel, { passive: false });
     return () => element.removeEventListener('wheel', onWheel);
-  }, [moveTo, step, viewport]);
+  }, [moveTo, step, viewport, wheelEnabled]);
 
   const advance = (direction: number) => {
     moveTo((Math.round(target.current / step) + direction) * step);
@@ -147,7 +158,7 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
     <>
       <div
         ref={region}
-        className="hero-gallery wheel-gallery"
+        className={`hero-gallery hero-carousel${wheelEnabled ? ' wheel-gallery' : ''}`}
         role="region"
         aria-roledescription="carousel"
         aria-label="Signature nail sets"
@@ -156,6 +167,43 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
         data-active-set={heroSets[active].id}
         onPointerEnter={() => { hovered.current = true; }}
         onPointerLeave={() => { hovered.current = false; released.current = false; }}
+        onTouchStart={(event) => {
+          if (event.touches.length !== 1 || (event.target instanceof Element && event.target.closest('a, button, video'))) {
+            touch.current = null;
+            return;
+          }
+          const point = event.touches[0];
+          touch.current = { id: point.identifier, x: point.clientX, y: point.clientY, axis: null };
+        }}
+        onTouchMove={(event) => {
+          const gesture = touch.current;
+          if (!gesture || event.touches.length !== 1) {
+            touch.current = null;
+            return;
+          }
+          const point = event.touches[0];
+          if (point.identifier !== gesture.id) {
+            touch.current = null;
+            return;
+          }
+          const dx = Math.abs(point.clientX - gesture.x);
+          const dy = Math.abs(point.clientY - gesture.y);
+          if (!gesture.axis && Math.max(dx, dy) > 8) {
+            if (dy >= dx) gesture.axis = 'vertical';
+            else if (dx > dy * 1.25) gesture.axis = 'horizontal';
+          }
+        }}
+        onTouchEnd={(event) => {
+          const gesture = touch.current;
+          touch.current = null;
+          if (!gesture || gesture.axis !== 'horizontal' || event.touches.length !== 0) return;
+          const point = Array.from(event.changedTouches).find((point) => point.identifier === gesture.id);
+          if (!point) return;
+          const dx = point.clientX - gesture.x;
+          const dy = point.clientY - gesture.y;
+          if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.25) advance(dx < 0 ? 1 : -1);
+        }}
+        onTouchCancel={() => { touch.current = null; }}
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget) return;
           if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -175,7 +223,7 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
       </div>
       <div className="carousel-toolbar">
         <button className="icon-button" aria-label="Previous signature set" onClick={() => advance(-1)}><ArrowLeft size={17} /></button>
-        <p id="hero-carousel-help">Scroll to explore<span>Move your pointer away to scroll the page. Press Escape to release the wheel.</span></p>
+        <p id="hero-carousel-help">{wheelEnabled ? 'Scroll to explore' : 'Swipe to explore'}<span>{wheelEnabled ? 'Move your pointer away to scroll the page. Press Escape to release the wheel.' : 'Swipe left or right, or use the arrows.'}</span></p>
         <button className="icon-button" aria-label="Next signature set" onClick={() => advance(1)}><ArrowRight size={17} /></button>
       </div>
     </>
