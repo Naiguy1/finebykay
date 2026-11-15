@@ -55,7 +55,8 @@ svg { flex-shrink: 0; }
 .hero-strip { position: absolute; left: 50%; top: 0; transform: translateX(-50%); display: flex; gap: clamp(18px, 2.8vw, 44px); width: 115%; align-items: flex-start; }
 .hero-card { width: 20%; height: clamp(275px, 29vw, 440px); flex-shrink: 1; position: relative; overflow: hidden; border-radius: 30px; background: var(--linen); }
 .hero-card img { height: 100%; }
-.wheel-gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.hero-carousel { touch-action: pan-y pinch-zoom; }
+.hero-carousel:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 .carousel-track { position: absolute; inset: 0; pointer-events: none; }
 .carousel-card { position: absolute; left: 0; top: 0; height: clamp(275px, 29vw, 440px); overflow: hidden; border-radius: 30px; background: var(--linen); will-change: transform; }
 .carousel-card img { height: 100%; }
@@ -151,7 +152,7 @@ svg { flex-shrink: 0; }
   .hero-copy h1 { font-size: 90px; }
   .hero-strip { width: 135%; }
   .hero-gallery { height: 370px; }
-  .hero-card { height: 310px; }
+  .hero-card, .carousel-card { height: 310px; }
   .scroll-circle { bottom: 0; }
   .portfolio-grid { gap: 35px 20px; }
   .portfolio-caption { display: grid; gap: 8px; }
@@ -180,7 +181,7 @@ svg { flex-shrink: 0; }
   .button { min-height: 50px; padding: 16px 22px; font-size: 10px; gap: 21px; }
   .hero-gallery { margin-top: 41px; height: 307px; }
   .hero-strip { width: 218%; gap: 15px; }
-  .hero-card { height: 250px; border-radius: 22px; }
+  .hero-card, .carousel-card { height: 250px; border-radius: 22px; }
   .hero-card-1, .hero-card-3 { margin-top: 18px; }
   .hero-card-2 { margin-top: 34px; }
   .hero-card-index { top: 16px; left: 16px; font-size: 9px; }
