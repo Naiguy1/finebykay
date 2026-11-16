@@ -15,7 +15,7 @@ export interface PortfolioSet {
   video?: string;
 }
 
-// This is Kalisa's original work, these images should not me overwritten.
+// Kalisa's original work. Preserve these images when adding new sets.
 export const portfolio: readonly PortfolioSet[] = [
   {
     id: 'teal-black-filigree',
@@ -131,12 +131,14 @@ export const portfolio: readonly PortfolioSet[] = [
   },
 ];
 
-export const heroSets = [portfolio[1], portfolio[2], portfolio[0], portfolio[1], portfolio[2]];
+// Every published lookbook set joins the carousel automatically.
+export const heroSets = portfolio;
 
 export const studio = {
   instagram: 'https://instagram.com/finebykay',
   handle: '@finebykay',
-  image: '/media/studio.webp',
+  image: portfolio[0].image,
+  imageAlt: portfolio[0].alt,
   // Editable placeholder studio narrative. Replace with Kalisa's own introduction.
   paragraphs: [
     'I believe getting your nails done should feel like taking a breath. A little time set aside, a thoughtful conversation, and something beautiful to carry into your everyday.',

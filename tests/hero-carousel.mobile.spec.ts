@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { CDPSession, Locator, Page } from '@playwright/test';
-import { heroSets } from '../src/data/portfolio';
+import { portfolio as heroSets } from '../src/data/portfolio';
 
 type Point = { x: number; y: number; id?: number };
 
@@ -18,8 +18,16 @@ async function drag(session: CDPSession, start: Point, end: Point, cancel = fals
 async function swipeArea(page: Page, carousel: Locator) {
   await carousel.scrollIntoViewIfNeeded();
   const box = (await carousel.boundingBox())!;
-  // Stay above the lookbook link, within the visible middle card.
-  return { x: page.viewportSize()!.width / 2, y: box.y + 110 };
+  // Hit the middle image surface, away from the overlaid lookbook link.
+  const point = { x: page.viewportSize()!.width / 2, y: box.y + 150 };
+  const image = carousel.locator('.carousel-card img').nth(2);
+  const bounds = (await image.boundingBox())!;
+  expect(point.x).toBeGreaterThan(bounds.x);
+  expect(point.x).toBeLessThan(bounds.x + bounds.width);
+  expect(point.y).toBeGreaterThan(bounds.y);
+  expect(point.y).toBeLessThan(bounds.y + bounds.height);
+  expect(await carousel.evaluate((region, point) => region.contains(document.elementFromPoint(point.x, point.y)), point)).toBeTruthy();
+  return point;
 }
 
 test('touch swipes cycle and wrap in both directions with reduced motion', async ({ page, context }) => {

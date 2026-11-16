@@ -26,7 +26,7 @@ jobs:
         shell: bash
       - name: Check production dependency vulnerabilities
         run: npm audit --omit=dev --audit-level=high
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e 2>&1 | tee browser.log
         id: browser
         shell: bash
