@@ -18,16 +18,16 @@ Direct dependencies and the resolved dependency tree are pinned in `package.json
 ```bash
 npm run lint
 npm run build
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:e2e
 npm run preview
 ```
 
-`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch-device fallback, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
+`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
 
-## Replace the sample work
+## Add Kalisa's work
 
-**The included nail photos and studio image are AI-generated sample imagery, not Kalisa's client work or a photograph of her studio.** Six demonstration entries reuse three nail images so you can see filtering and layout. Replace the images and placeholder About narrative before presenting this as a portfolio of actual work. No location, availability schedule, qualifications, or booking promises have been invented.
+The photos in `public/media/` are Kalisa's original work. Preserve existing originals when adding new sets. The lookbook and hero carousel share the same portfolio manifest, so every published set appears in both. The About narrative remains editable studio copy.
 
 1. Put original photos in **`public/media/`**, e.g. `public/media/botanical-gel.webp`. Use a roughly 3:4 portrait crop, ideally 1200 × 1600px. WebP/JPEG is recommended, around 150–400KB for the grid. Keep source originals separately.
 2. Edit **`src/data/portfolio.ts`**. Add or update a typed entry:
@@ -46,11 +46,9 @@ npm run preview
 }
 ```
 
-3. Update `heroSets` in the same file to choose the five hero positions. Update `studio.image` and `studio.paragraphs` for the studio photo and About copy. The `services` array holds the editable menu descriptions. Starting pricing lives in `src/components/Services.tsx`.
-4. For a social sharing image, replace `public/media/rose.webp` or update the absolute `og:image` URL in `index.html`. Also update its preload link if changing the central hero image.
+3. The carousel automatically includes every entry in `portfolio`, in manifest order, and wraps only after the full collection. There is no separate five-image selection to maintain. Adding a file alone does not publish it: add its title, category, alt text, and image path to the manifest, then rebuild. Update `studio.image`, `studio.imageAlt`, and `studio.paragraphs` for the About image and copy. The `services` array holds the editable menu descriptions. Starting pricing lives in `src/components/Services.tsx`.
+4. The social image and central hero preload are configured in `index.html`; update those paths if their chosen photo is renamed or removed.
 5. Run lint, build, and browser checks again. All public paths start with `/media/`, **not** `/public/media/`. This app expects to be served at the domain root.
-
-Sample image provenance and generation prompts: [`public/media/ASSETS.md`](public/media/ASSETS.md).
 
 ## Design and behavior
 

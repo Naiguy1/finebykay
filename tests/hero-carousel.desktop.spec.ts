@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { portfolio } from '../src/data/portfolio';
 
 test('desktop wheel moves the carousel, reverses, and leaves page scrolling available', async ({ page }) => {  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
@@ -29,10 +30,23 @@ test('desktop buttons and keyboard loop through a complete sequence in both dire
   await page.goto('/');
   const carousel = page.getByRole('region', { name: 'Signature nail sets' });
   const first = await carousel.getAttribute('data-active-set');
-  for (let index = 0; index < 5; index++) await page.getByRole('button', { name: 'Next signature set' }).click();
-  await expect(carousel).toHaveAttribute('data-active-set', first!);
+  const initial = portfolio.findIndex((set) => set.id === first);
+  expect(initial).toBeGreaterThanOrEqual(0);
+  const seen = new Set<string>();
+  for (let index = 1; index <= portfolio.length; index++) {
+    await page.getByRole('button', { name: 'Next signature set' }).click();
+    const expected = portfolio[(initial + index) % portfolio.length];
+    await expect(carousel).toHaveAttribute('data-active-set', expected.id);
+    const image = carousel.locator(`.carousel-card img[src="${expected.image}"]`).first();
+    await expect.poll(() => image.evaluate((element) => element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0)).toBeTruthy();
+    seen.add(expected.id);
+  }
+  expect(seen.size).toBe(portfolio.length);
   await carousel.focus();
-  for (let index = 0; index < 5; index++) await carousel.press('ArrowLeft');
+  for (let index = 1; index <= portfolio.length; index++) {
+    await carousel.press('ArrowLeft');
+    await expect(carousel).toHaveAttribute('data-active-set', portfolio[(initial - index + portfolio.length) % portfolio.length].id);
+  }
   await expect(carousel).toHaveAttribute('data-active-set', first!);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 

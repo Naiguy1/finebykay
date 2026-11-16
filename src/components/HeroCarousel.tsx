@@ -14,9 +14,10 @@ import { useDesktopCarousel } from '../hooks/useDesktopCarousel';
 
 const wrap = (value: number, length: number) => ((value % length) + length) % length;
 
-function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
+function CarouselCard({ set, index, count, width, gap, viewport, offset, progress }: {
   set: PortfolioSet;
   index: number;
+  count: number;
   width: number;
   gap: number;
   viewport: number;
@@ -25,8 +26,8 @@ function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
 }) {
   const reduced = useReducedMotion();
   const step = width + gap;
-  const period = step * heroSets.length * 2;
-  // Recycle each card only when it is offscreen. Two full sets cover both edges.
+  const period = step * count;
+  // Recycle only beyond the viewport; repeat short lists just enough to cover it.
   const x = useTransform(offset, (value) => wrap((index - 2) * step + (viewport - width) / 2 - value + step, period) - step);
   const y = useTransform(() => {
     const distance = Math.min(Math.abs(x.get() + width / 2 - viewport / 2) / (step * 2), 1);
@@ -41,14 +42,15 @@ function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
         alt=""
         width="900"
         height="1200"
-        loading="eager"
+        loading={index < 5 ? 'eager' : 'lazy'}
+        draggable={false}
         fetchPriority={index === 2 ? 'high' : 'auto'}
         style={{ objectPosition: set.objectPosition }}
         initial={{ scale: reduced ? 1 : 1.06 }}
         animate={{ scale: 1 }}
         transition={{ duration: reduced ? 0 : 1.1 }}
       />
-      <span className="hero-card-index">0{index % heroSets.length + 1}</span>
+      <span className="hero-card-index">{String(index % heroSets.length + 1).padStart(2, '0')}</span>
     </motion.div>
   );
 }
@@ -56,7 +58,8 @@ function CarouselCard({ set, index, width, gap, viewport, offset, progress }: {
 export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
   const wheelEnabled = useDesktopCarousel();
   const region = useRef<HTMLDivElement>(null);
-  const touch = useRef<{ id: number; x: number; y: number; axis: 'horizontal' | 'vertical' | null } | null>(null);
+  const pointers = useRef(new Set<number>());
+  const gesture = useRef<{ id: number; x: number; y: number; offset: number; snap: number; axis: 'horizontal' | 'vertical' | null } | null>(null);
   const target = useRef(0);
   const released = useRef(false);
   const hovered = useRef(false);
@@ -64,12 +67,14 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
   const reduced = useReducedMotion();
   const offset = useMotionValue(0);
   const [viewport, setViewport] = useState(() => window.innerWidth);
-  const [active, setActive] = useState(2);
+  const [active, setActive] = useState(() => wrap(2, heroSets.length));
   const gap = viewport <= 640 ? 15 : Math.min(44, Math.max(18, viewport * 0.028));
   const stripRatio = viewport <= 640 ? 2.18 : viewport <= 1000 ? 1.35 : 1.15;
   const width = (viewport * stripRatio - gap * 4) / 5;
   const step = width + gap;
   const previousStep = useRef(step);
+  const cardCount = Math.ceil((Math.ceil(viewport / step) + 2) / heroSets.length) * heroSets.length;
+  const cards = Array.from({ length: cardCount }, (_, index) => heroSets[index % heroSets.length]);
 
   useMotionValueEvent(offset, 'change', (value) => {
     const next = wrap(2 + Math.round(value / step), heroSets.length);
@@ -99,6 +104,36 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
     frame.current = requestAnimationFrame(settle);
   }, [offset, reduced]);
 
+  const cancelGesture = useCallback(() => {
+    const current = gesture.current;
+    gesture.current = null;
+    if (!current) return;
+    // Clear before releasing capture: lostpointercapture must not cancel a new snap.
+    const element = region.current;
+    if (element?.hasPointerCapture(current.id)) element.releasePointerCapture(current.id);
+    moveTo(current.snap);
+  }, [moveTo]);
+
+  useEffect(() => {
+    const activePointers = pointers.current;
+    const down = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+      activePointers.add(event.pointerId);
+      // Observe secondary contacts anywhere on the page, including outside this region.
+      if (activePointers.size > 1) cancelGesture();
+    };
+    const up = (event: PointerEvent) => activePointers.delete(event.pointerId);
+    window.addEventListener('pointerdown', down, true);
+    window.addEventListener('pointerup', up, true);
+    window.addEventListener('pointercancel', up, true);
+    return () => {
+      window.removeEventListener('pointerdown', down, true);
+      window.removeEventListener('pointerup', up, true);
+      window.removeEventListener('pointercancel', up, true);
+      activePointers.clear();
+    };
+  }, [cancelGesture]);
+
   useEffect(() => {
     if (reduced) offset.set(target.current);
     return () => {
@@ -111,9 +146,15 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
     // Retain the current set and any in-flight movement when the layout changes.
     const ratio = step / previousStep.current;
     previousStep.current = step;
+    const current = gesture.current;
+    gesture.current = null;
+    if (current) {
+      target.current = current.snap;
+      if (region.current?.hasPointerCapture(current.id)) region.current.releasePointerCapture(current.id);
+      offset.set(current.snap);
+    }
     target.current *= ratio;
     offset.set(offset.get() * ratio);
-    touch.current = null;
     setActive(wrap(2 + Math.round(offset.get() / step), heroSets.length));
   }, [offset, step]);
 
@@ -167,43 +208,44 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
         data-active-set={heroSets[active].id}
         onPointerEnter={() => { hovered.current = true; }}
         onPointerLeave={() => { hovered.current = false; released.current = false; }}
-        onTouchStart={(event) => {
-          if (event.touches.length !== 1 || (event.target instanceof Element && event.target.closest('a, button, video'))) {
-            touch.current = null;
+        onPointerDown={(event) => {
+          if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+          if (!event.isPrimary || pointers.current.size > 1 || gesture.current) {
+            cancelGesture();
             return;
           }
-          const point = event.touches[0];
-          touch.current = { id: point.identifier, x: point.clientX, y: point.clientY, axis: null };
+          if (event.target instanceof Element && event.target.closest('a, button, video')) return;
+          gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY, offset: offset.get(), snap: Math.round(target.current / step) * step, axis: null };
+          if (frame.current !== null) cancelAnimationFrame(frame.current);
+          frame.current = null;
+          // Capture keeps a drag intact when the finger or pen leaves the carousel.
+          // Synthetic accessibility/test events may not represent an active pointer.
+          try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* No active native pointer. */ }
         }}
-        onTouchMove={(event) => {
-          const gesture = touch.current;
-          if (!gesture || event.touches.length !== 1) {
-            touch.current = null;
-            return;
+        onPointerMove={(event) => {
+          const current = gesture.current;
+          if (!current || current.id !== event.pointerId) return;
+          const dx = event.clientX - current.x;
+          const dy = event.clientY - current.y;
+          if (!current.axis && Math.max(Math.abs(dx), Math.abs(dy)) > 8) {
+            if (Math.abs(dy) >= Math.abs(dx)) current.axis = 'vertical';
+            else if (Math.abs(dx) > Math.abs(dy) * 1.25) current.axis = 'horizontal';
           }
-          const point = event.touches[0];
-          if (point.identifier !== gesture.id) {
-            touch.current = null;
-            return;
-          }
-          const dx = Math.abs(point.clientX - gesture.x);
-          const dy = Math.abs(point.clientY - gesture.y);
-          if (!gesture.axis && Math.max(dx, dy) > 8) {
-            if (dy >= dx) gesture.axis = 'vertical';
-            else if (dx > dy * 1.25) gesture.axis = 'horizontal';
-          }
+          if (current.axis === 'horizontal') offset.set(current.offset - Math.max(-step, Math.min(step, dx)));
         }}
-        onTouchEnd={(event) => {
-          const gesture = touch.current;
-          touch.current = null;
-          if (!gesture || gesture.axis !== 'horizontal' || event.touches.length !== 0) return;
-          const point = Array.from(event.changedTouches).find((point) => point.identifier === gesture.id);
-          if (!point) return;
-          const dx = point.clientX - gesture.x;
-          const dy = point.clientY - gesture.y;
-          if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.25) advance(dx < 0 ? 1 : -1);
+        onPointerUp={(event) => {
+          const current = gesture.current;
+          if (!current || current.id !== event.pointerId) return;
+          gesture.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+          const dx = event.clientX - current.x;
+          const dy = event.clientY - current.y;
+          // A fast flick may deliver down/up with no intermediate pointermove.
+          const swiped = current.axis !== 'vertical' && Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy) * 1.25;
+          moveTo(current.snap + (swiped ? (dx < 0 ? step : -step) : 0));
         }}
-        onTouchCancel={() => { touch.current = null; }}
+        onPointerCancel={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
+        onLostPointerCapture={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget) return;
           if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -214,8 +256,8 @@ export function HeroCarousel({ progress }: { progress: MotionValue<number> }) {
         }}
       >
         <div className="carousel-track" aria-hidden="true">
-          {[...heroSets, ...heroSets].map((set, index) => (
-            <CarouselCard key={`${set.id}-${index}`} set={set} index={index} width={width} gap={gap} viewport={viewport} offset={offset} progress={progress} />
+          {cards.map((set, index) => (
+            <CarouselCard key={`${set.id}-${index}`} set={set} index={index} count={cardCount} width={width} gap={gap} viewport={viewport} offset={offset} progress={progress} />
           ))}
         </div>
         <p className="sr-only" aria-live="polite" aria-atomic="true">Featured set: {heroSets[active].title}. {heroSets[active].alt}</p>
