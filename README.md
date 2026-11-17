@@ -25,37 +25,53 @@ npm run preview
 
 `npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
 
-## Add Kalisa's work
+## Edit names, descriptions, and photos
 
-The photos in `public/media/` are Kalisa's original work. Preserve existing originals when adding new sets. The lookbook and hero carousel share the same portfolio manifest, so every published set appears in both. The About narrative remains editable studio copy.
+**Edit `content/sets.yaml`** to change a set's name, description, image description, category, or tags. This is the only authored source for portfolio content. You can edit it directly in GitHub; no React or TypeScript changes are needed.
 
-1. Put original photos in **`public/media/`**, e.g. `public/media/botanical-gel.webp`. Use a roughly 3:4 portrait crop, ideally 1200 × 1600px. WebP/JPEG is recommended, around 150–400KB for the grid. Keep source originals separately.
-2. Edit **`src/data/portfolio.ts`**. Add or update a typed entry:
-
-```ts
-{
-  id: 'botanical-gel',
-  title: 'Botanical study',
-  category: 'Intricate Art', // Natural Nails | Structured Gel | Intricate Art
-  image: '/media/botanical-gel.webp',
-  highRes: '/media/botanical-gel-large.webp', // optional, detail view only
-  alt: 'Sheer pink almond nails with hand-painted burgundy flowers',
-  tags: ['Builder gel', 'Hand-painted botanical'],
-  objectPosition: '50% 50%', // optional crop alignment
-  // video: '/media/botanical-detail.mp4', // optional lightbox video, controls, no autoplay
-}
+```yaml
+- id: botanical-gel
+  name: Botanical study
+  description: >-
+    Write the story of this set here.
+    Several indented lines become one paragraph.
+  category: Intricate Art
+  image: /media/botanical-gel.jpg
+  image_description: Sheer pink nails with hand-painted burgundy flowers.
+  tags:
+    - Botanical detail
+    - Burgundy
 ```
 
-3. The carousel automatically includes every entry in `portfolio`, in manifest order, and wraps only after the full collection. There is no separate five-image selection to maintain. Adding a file alone does not publish it: add its title, category, alt text, and image path to the manifest, then rebuild. Update `studio.image`, `studio.imageAlt`, and `studio.paragraphs` for the About image and copy. The `services` array holds the editable menu descriptions. Starting pricing lives in `src/components/Services.tsx`.
-4. The social image and central hero preload are configured in `index.html`; update those paths if their chosen photo is renamed or removed.
-5. Run lint, build, and browser checks again. All public paths start with `/media/`, **not** `/public/media/`. This app expects to be served at the domain root.
+- **Keep `id` unchanged when renaming an existing set.** Its permanent shared address is `https://nails.bowerbanks.com/sets/botanical-gel/`. IDs use lowercase letters, numbers, and single hyphens. A new set needs a new, unique ID. Keep published entries if their shared links should continue to work.
+- `name` appears on the site and in shared previews. `description` is the short paragraph in its reveal and shared preview. The supplied descriptions are filler copy, marked in the file's comments for easy replacement.
+- `image_description` describes what is actually visible for people using screen readers. Preserve the existing accurate image descriptions when editing names or filler copy.
+- Category must be **Natural Nails**, **Structured Gel**, or **Intricate Art**. Tags are optional; use `tags: []` for none.
+- Put original photos in **`public/media/`** and use `/media/filename.jpg` in the YAML. A roughly 3:4 portrait crop works well. WebP/JPEG is recommended, around 150–400KB for the grid. Preserve existing originals when adding sets.
+- Optional fields are `high_resolution: /media/photo-large.jpg`, `image_position: "50% 50%"`, and `video: /media/detail.mp4`. Videos use native controls and never autoplay. Paths with spaces may be percent-encoded (`%20`).
+
+To add a set, copy an entry in the YAML, change its ID, update its text and photo path, then rebuild. Every published set automatically joins both the carousel and the lookbook. Saving YAML alone does not update the live site: **rebuild and redeploy** to publish. Restart the development server after editing YAML during local work.
+
+```bash
+npm run content:generate  # validates the YAML and media paths
+npm run test:content      # checks content validation and static page generation
+npm run lint
+npm run build
+npm run test:e2e
+```
+
+YAML indentation matters: keep two spaces before fields and four spaces before description lines. Text after `>-` can include ordinary punctuation without quotes. Build errors identify the set and the field that needs attention, including missing photos, duplicate IDs, and misspelled field names.
+
+The build generates `src/data/sets.generated.json` for the browser and a real `dist/sets/<id>/index.html` for every shared link. **Do not edit generated files.** Each static page includes its own title, description, canonical URL, photograph, Open Graph/Twitter preview metadata, and a no-JavaScript fallback. The built sitemap includes every set. Messaging platforms control preview display and may cache older previews.
+
+The About introduction and studio links remain in `src/data/portfolio.ts`; starting pricing lives in `src/components/Services.tsx`. The homepage social image and central hero preload are configured in `index.html`.
 
 ## Design and behavior
 
 - Tokens and responsive styling: `src/styles.css`, including Tailwind `@theme` colors and locally bundled Cormorant Garamond / Inter fonts via Fontsource.
 - Components: `src/components/` (Header, Hero, Lookbook, Lightbox, Services, About, Contact).
 - Anchors: `#work`, `#services`, `#about`, `#contact`.
-- Motion: 0.7–1.1 second entrances, custom `[0.22, 1, 0.36, 1]` easing, scroll-linked hero depth, magnetic links, image settling, and a shared category pill. The lightbox uses a shorter opacity crossfade to keep navigation comfortable.
+- Motion: 0.7–1.1 second entrances, custom `[0.22, 1, 0.36, 1]` easing, scroll-linked hero depth, magnetic links, image settling, and a shared category pill. Set reveals expand from the selected photograph and support reduced motion.
 - Reduced motion: OS preferences disable scroll animation, parallax, magnetic movement, layout motion, image scaling, and long transitions.
 - Hero carousel: swipe left or right on phones and touch tablets to cycle seamlessly through the featured sets. Vertical scrolling and browser pinch zoom remain available; short, cancelled, and multi-touch gestures do not change sets. Arrow buttons/keys work at every size. On screens at least 1024px wide with a fine hover pointer, wheel over the images to cycle. Move the pointer away or press Escape to restore page scrolling; Ctrl/Meta wheel zoom is left to the browser. Resizing preserves the selected set, and reduced motion removes easing and parallax.
 - Lightbox: native modal dialog for focus trapping and background inertness; focus returns to the opening card; Escape closes; arrow keys and horizontal swipes move through the current category; zoom enables image panning. Optional video supports native controls and never autoplays.
@@ -69,7 +85,7 @@ npm run lint
 npm run build
 ```
 
-Serve the **contents of `dist/`** from any static web server at `https://nails.bowerbanks.com/`. Assets and fonts are included. There is one HTML page; no application server or catch-all route is needed. Configure your DNS and HTTPS with your hosting provider. Canonical, Open Graph, robots, and sitemap URLs already use `nails.bowerbanks.com`.
+Serve the **contents of `dist/`** from any static web server at `https://nails.bowerbanks.com/`. Assets and fonts are included. The build includes the homepage and one real HTML directory per set. Serve directory indexes normally; no application server or catch-all route is needed. Configure your DNS and HTTPS with your hosting provider. Canonical, Open Graph, robots, and sitemap URLs already use `nails.bowerbanks.com`.
 
 Example Caddy configuration when serving a copied `dist/` directory:
 

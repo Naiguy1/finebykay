@@ -1,5 +1,6 @@
 """Check the built production container's HTTP behavior without third-party packages."""
 from html.parser import HTMLParser
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 import time
@@ -63,8 +64,25 @@ for path in parser.paths:
         assert "text/html" not in response.headers.get("Content-Type", ""), path
         assert response.read(64), path
 
+# Each share address must work on the real static server, without an SPA fallback.
+set_pages = list(Path("dist/sets").glob("*/index.html"))
+assert set_pages, "The production build must include individual set pages"
+for page in set_pages:
+    path = "/sets/" + page.parent.name + "/"
+    with request(path) as response:
+        assert response.status == 200, path
+        check_headers(response)
+        html = response.read().decode()
+        assert f'content="https://nails.bowerbanks.com{path}"' in html, path
+        assert 'property="og:image"' in html, path
+        assert "Explore more work" in html, path
+
+with request("/sets/not-a-published-set/") as response:
+    assert response.status == 404
+    check_headers(response)
+
 with request("/missing-review-asset.js") as response:
     assert response.status == 404
     check_headers(response)
 
-print("Production HTTP checks passed: HTML/assets/404 headers, immutable caching, asset MIME types.")
+print("Production HTTP checks passed: home/set pages/assets/404 headers, sharing metadata, immutable caching, asset MIME types.")

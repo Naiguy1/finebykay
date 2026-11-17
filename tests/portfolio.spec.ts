@@ -40,7 +40,7 @@ test('filter, keyboard lightbox navigation, zoom, focus trap and restore', async
   await expect(dialog.getByRole('button', { name: 'Close lookbook' })).toBeFocused();
   await expect(dialog.getByRole('heading')).toHaveText(naturalSets[0].title);
   await page.keyboard.press('ArrowRight');
-  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[1].title);
+  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[1 % naturalSets.length].title);
   await dialog.getByRole('button', { name: 'Zoom in', exact: true }).click();
   await expect(dialog.getByRole('button', { name: 'Zoom out', exact: true })).toHaveAttribute('aria-pressed', 'true');
   for (let i = 0; i < 8; i++) {
