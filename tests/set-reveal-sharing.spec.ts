@@ -247,7 +247,7 @@ test('normal motion expands the selected photograph and settles into the editori
   const selected = portfolio[(activeIndex + 1) % portfolio.length];
   // The adjacent photograph carries the carousel's shallow rotation.
   const card = carousel.getByRole('button', { name: `Open ${selected.title}`, exact: true });
-  await expect.poll(() => card.locator('img').evaluate((image) => image.complete && image.naturalWidth > 0)).toBeTruthy();
+  await expect.poll(() => card.locator('img').evaluate((image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0)).toBeTruthy();
   // Capture the real animation when React inserts its portal, rather than racing
   // a half-second reveal with an automation round trip.
   const reveal = await card.evaluate((element) => new Promise<{
