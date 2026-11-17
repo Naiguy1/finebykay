@@ -1,4 +1,4 @@
-import sets from './sets.generated.json';
+import sets from './sets.generated.json' with { type: 'json' };
 
 export const categories = ['All', 'Natural Nails', 'Structured Gel', 'Intricate Art'] as const;
 export type Category = (typeof categories)[number];
