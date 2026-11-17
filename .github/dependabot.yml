@@ -4,6 +4,18 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Major upgrades require a coordinated migration of dependent plugins.
+    # Keep compatible patch/minor updates automated, including security fixes.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      build-toolchain:
+        patterns: ["vite", "@vitejs/*", "tailwindcss", "@tailwindcss/*"]
+      lint-and-typescript:
+        patterns: ["eslint", "@eslint/*", "typescript", "typescript-eslint", "@typescript-eslint/*", "eslint-plugin-*"]
   - package-ecosystem: docker
     directory: /
     schedule:

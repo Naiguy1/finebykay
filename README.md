@@ -25,6 +25,20 @@ npm run preview
 
 `npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
 
+## Dependency updates and failed checks
+
+Use the pinned Node 22 build environment and `npm ci` with the committed lockfile. Vite, its React plugin, and Tailwind's Vite integration must accept the same Vite major. The current supported stack uses Vite 7; Vite 8 requires a coordinated plugin migration. ESLint, its configuration packages/plugins, and the TypeScript parser also need compatible peer versions. Update React and React DOM together.
+
+Dependabot groups related packages and limits automatic npm updates to patch/minor releases. Major releases remain deliberate migrations: check peer requirements and security advisories, regenerate the lockfile normally, and run the full validation before merging. Do not bypass a peer conflict with `--force` or `--legacy-peer-deps`, and do not disable audit gates to make checks green. If a security fix requires a major upgrade, perform that coordinated migration promptly.
+
+CI uses Ubuntu 24.04 with the pinned Playwright version; do not change the runner image independently of browser support. CI validates pull requests and pushes to `main`, avoiding duplicate feature-branch runs. Check the first failed stage: **installation**, **dependency audit**, **content**, **lint**, **build**, **browser installation/tests**, or **container**. The stage table distinguishes failed checks from checks that did not run; an audit failure can coexist with passing functional checks. Installation and audit output is preserved in the validation report and uploaded artifacts alongside later-stage logs.
+
+### Upstream audit blocker (November 17, 2026)
+
+The full dependency audit currently reports [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), a high-severity regular-expression denial-of-service issue in picomatch through 4.0.7. It appears through multiple build-tool dependency paths, producing 12 affected-package findings from one underlying advisory. Upstream's latest release is 4.0.7 and the advisory lists no patched version. This repair does not mark that vulnerability as fixed or substitute an unreviewed fork.
+
+The audit step and overall validation remain failed while the advisory is unresolved. Independent content, lint, build, browser, and container checks still run when their own prerequisites pass, so their results can be assessed separately. An installation failure still prevents dependency-dependent checks. When an upstream fix is published, update the affected dependency graph, regenerate the lockfile normally, and rerun the complete validation.
+
 ## Edit names, descriptions, and photos
 
 **Edit `content/sets.yaml`** to change a set's name, description, image description, category, or tags. This is the only authored source for portfolio content. You can edit it directly in GitHub; no React or TypeScript changes are needed.
