@@ -248,6 +248,24 @@ test('normal motion expands the selected photograph and settles into the editori
   // The adjacent photograph carries the carousel's shallow rotation.
   const card = carousel.getByRole('button', { name: `Open ${selected.title}`, exact: true });
   await expect.poll(() => card.locator('img').evaluate((image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0)).toBeTruthy();
+  const inspectSource = () => card.evaluate((element) => {
+    const ancestors: { element: string; inlineTransform: string; transform: string; rotate: string; rotation: number; bounds: { x: number; y: number; width: number; height: number } }[] = [];
+    let parent: HTMLElement | null = element as HTMLElement;
+    while (parent && parent !== document.body) {
+      const style = getComputedStyle(parent);
+      const matrix = new DOMMatrixReadOnly(style.transform === 'none' ? undefined : style.transform);
+      const rotate = style.getPropertyValue('rotate');
+      const rotation = Math.atan2(matrix.b, matrix.a) * 180 / Math.PI + (Number.parseFloat(rotate) || 0);
+      const bounds = parent.getBoundingClientRect();
+      ancestors.push({ element: `${parent.tagName}.${parent.className}`, inlineTransform: parent.style.transform, transform: style.transform, rotate, rotation, bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height } });
+      parent = parent.parentElement;
+    }
+    return { id: (element as HTMLElement).dataset.setId, rotation: ancestors.reduce((sum, ancestor) => sum + ancestor.rotation, 0), ancestors };
+  });
+  const beforeSettling = await inspectSource();
+  await expect.poll(async () => Math.abs((await inspectSource()).rotation), { message: `Adjacent card rotation before reveal: ${JSON.stringify(beforeSettling)}` }).toBeGreaterThan(0.1);
+  const source = await inspectSource();
+  await testInfo.attach('source-before-reveal', { body: JSON.stringify(source, null, 2), contentType: 'application/json' });
   // Capture the real animation when React inserts its portal, rather than racing
   // a half-second reveal with an automation round trip.
   const reveal = await card.evaluate((element) => new Promise<{
@@ -278,7 +296,7 @@ test('normal motion expands the selected photograph and settles into the editori
   expect(reveal.duration).toBeLessThanOrEqual(650);
   expect(reveal.sourceWidth).toBeGreaterThan(0);
   expect(reveal.targetWidth).toBeGreaterThan(reveal.sourceWidth + 1);
-  expect(Math.abs(reveal.sourceRotation)).toBeGreaterThan(0.1);
+  expect(Math.abs(reveal.sourceRotation), JSON.stringify({ source, reveal })).toBeGreaterThan(0.1);
   expect(Math.abs(reveal.targetRotation)).toBeLessThan(0.01);
   const dialog = page.getByRole('dialog');
   await expect(dialog.locator('.lightbox-reveal')).toBeHidden();

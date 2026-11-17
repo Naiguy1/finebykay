@@ -27,10 +27,17 @@ function photograph(origin?: HTMLElement | null) {
   let rotation = 0;
   let parent: HTMLElement | null = frame;
   while (parent && parent !== document.body) {
-    const transform = getComputedStyle(parent).transform;
+    const style = getComputedStyle(parent);
+    const transform = style.transform;
     if (transform !== 'none') {
       const matrix = new DOMMatrixReadOnly(transform);
       rotation += Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
+    }
+    // Individual CSS rotate is composed outside the transform matrix.
+    const angle = style.rotate?.split(' ').at(-1);
+    if (angle && angle !== 'none') {
+      const amount = parseFloat(angle);
+      if (Number.isFinite(amount)) rotation += angle.endsWith('grad') ? amount * 0.9 : angle.endsWith('rad') ? amount * 180 / Math.PI : angle.endsWith('turn') ? amount * 360 : amount;
     }
     parent = parent.parentElement;
   }
@@ -114,6 +121,11 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
       element.close();
       document.body.style.overflow = overflow;
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      // React restores commit-time focus after layout cleanup; restore the opener
+      // once the portal is removed, without stealing focus from a newer viewer.
+      if (initial.current.origin) requestAnimationFrame(() => {
+        if (previousFocus?.isConnected && !document.querySelector('dialog[open]')) previousFocus.focus({ preventScroll: true });
+      });
     };
   }, []);
 
@@ -239,8 +251,8 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
           </motion.div>
         </div>
         <div className="lightbox-bottom">
-          <div className="lightbox-story" key={set.id}><p className="eyebrow">{set.category}</p><h2 id="lightbox-title">{set.title}</h2><p className="lightbox-tags">{set.tags.join(' · ')}</p><p className="lightbox-description">{set.description}</p></div>
-          <ShareSet key={set.id} set={set} />
+          <div className="lightbox-story" key={`story-${set.id}`}><p className="eyebrow">{set.category}</p><h2 id="lightbox-title">{set.title}</h2><p className="lightbox-tags">{set.tags.join(' · ')}</p><p className="lightbox-description">{set.description}</p></div>
+          <ShareSet key={`share-${set.id}`} set={set} />
           {sharedEntry && <button className="lightbox-explore" onClick={onClose}>Explore more work <ArrowUpRight size={16} aria-hidden="true" /></button>}
           <div className="lightbox-controls"><button className="icon-button" aria-label="Previous set" onClick={() => navigate(index - 1)}><ArrowLeft size={20} /></button><span aria-live="polite" aria-atomic="true">{String(index + 1).padStart(2, '0')} / {String(sets.length).padStart(2, '0')}</span><button className="icon-button" aria-label="Next set" onClick={() => navigate(index + 1)}><ArrowRight size={20} /></button>{!set.video && <button className="icon-button" aria-label={zoomed ? 'Zoom out' : 'Zoom in'} aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOut size={20} /> : <ZoomIn size={20} />}</button>}</div>
           <p id="lightbox-instructions" className="lightbox-hint">{zoomed ? 'Arrow keys to pan · Tab for gallery controls · Escape to close' : 'Arrow keys or swipe to explore · Escape to close'}</p>
