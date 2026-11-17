@@ -31,7 +31,13 @@ Use the pinned Node 22 build environment and `npm ci` with the committed lockfil
 
 Dependabot groups related packages and limits automatic npm updates to patch/minor releases. Major releases remain deliberate migrations: check peer requirements and security advisories, regenerate the lockfile normally, and run the full validation before merging. Do not bypass a peer conflict with `--force` or `--legacy-peer-deps`, and do not disable audit gates to make checks green. If a security fix requires a major upgrade, perform that coordinated migration promptly.
 
-CI validates pull requests and pushes to `main`, avoiding duplicate feature-branch runs. Check the first failed stage: **installation**, **dependency audit**, **content**, **lint**, **build**, **browser installation/tests**, or **container**. A failure before the browser stage means the browser tests have not run. Installation and audit output is preserved in the validation report and uploaded artifacts alongside later-stage logs.
+CI validates pull requests and pushes to `main`, avoiding duplicate feature-branch runs. Check the first failed stage: **installation**, **dependency audit**, **content**, **lint**, **build**, **browser installation/tests**, or **container**. The stage table distinguishes failed checks from checks that did not run; an audit failure can coexist with passing functional checks. Installation and audit output is preserved in the validation report and uploaded artifacts alongside later-stage logs.
+
+### Upstream audit blocker (November 17, 2026)
+
+The full dependency audit currently reports [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), a high-severity regular-expression denial-of-service issue in picomatch through 4.0.7. It appears through multiple build-tool dependency paths, producing 12 affected-package findings from one underlying advisory. Upstream's latest release is 4.0.7 and the advisory lists no patched version. This repair does not mark that vulnerability as fixed or substitute an unreviewed fork.
+
+The audit step and overall validation remain failed while the advisory is unresolved. Independent content, lint, build, browser, and container checks still run when their own prerequisites pass, so their results can be assessed separately. An installation failure still prevents dependency-dependent checks. When an upstream fix is published, update the affected dependency graph, regenerate the lockfile normally, and rerun the complete validation.
 
 ## Edit names, descriptions, and photos
 
