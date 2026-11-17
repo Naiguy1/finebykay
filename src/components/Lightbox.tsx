@@ -4,6 +4,8 @@ import { animate, AnimatePresence, motion, useMotionValue, useReducedMotion } fr
 import { ArrowLeft, ArrowRight, ArrowUpRight, X, ZoomIn, ZoomOut } from 'lucide-react';
 import type { PortfolioSet } from '../data/portfolio';
 import { ShareSet } from './ShareSet';
+import { photograph } from '../utils/photograph';
+import type { PhotographFrame } from '../utils/photograph';
 
 interface LightboxProps {
   sets: readonly PortfolioSet[];
@@ -11,40 +13,13 @@ interface LightboxProps {
   onNavigate: (index: number) => void;
   onClose: () => void;
   origin?: HTMLElement | null;
+  originFrame?: PhotographFrame | null;
   closing?: boolean;
   onExited?: () => void;
   sharedEntry?: boolean;
 }
 
 const easing = 'cubic-bezier(.22, 1, .36, 1)';
-
-/** Measure the photograph rather than its caption or the rotated bounding box. */
-function photograph(origin?: HTMLElement | null) {
-  if (!origin?.isConnected) return null;
-  const frame = origin.querySelector<HTMLElement>('.portfolio-photo') ?? origin;
-  const bounds = frame.getBoundingClientRect();
-  if (bounds.width === 0 || bounds.height === 0 || bounds.bottom <= 0 || bounds.top >= innerHeight || bounds.right <= 0 || bounds.left >= innerWidth) return null;
-  let rotation = 0;
-  let parent: HTMLElement | null = frame;
-  while (parent && parent !== document.body) {
-    const style = getComputedStyle(parent);
-    const transform = style.transform;
-    if (transform !== 'none') {
-      const matrix = new DOMMatrixReadOnly(transform);
-      rotation += Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
-    }
-    // Individual CSS rotate is composed outside the transform matrix.
-    const angle = style.rotate?.split(' ').at(-1);
-    if (angle && angle !== 'none') {
-      const amount = parseFloat(angle);
-      if (Number.isFinite(amount)) rotation += angle.endsWith('grad') ? amount * 0.9 : angle.endsWith('rad') ? amount * 180 / Math.PI : angle.endsWith('turn') ? amount * 360 : amount;
-    }
-    parent = parent.parentElement;
-  }
-  const width = frame.offsetWidth;
-  const height = frame.offsetHeight;
-  return { frame, left: bounds.left + bounds.width / 2 - width / 2, top: bounds.top + bounds.height / 2 - height / 2, width, height, rotation, radius: getComputedStyle(frame).borderRadius };
-}
 
 /** object-fit: contain leaves empty space around the visible photograph. */
 function containedImage(viewport: HTMLElement, sourceImage?: HTMLImageElement | null) {
@@ -61,7 +36,7 @@ function imageFrame(box: NonNullable<ReturnType<typeof photograph>> | ReturnType
   return { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px`, transform: `rotate(${box.rotation}deg)`, borderRadius: box.radius };
 }
 
-export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = false, onExited, sharedEntry = false }: LightboxProps) {
+export function Lightbox({ sets, index, onNavigate, onClose, origin, originFrame, closing = false, onExited, sharedEntry = false }: LightboxProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const shell = useRef<HTMLDivElement>(null);
   const ghost = useRef<HTMLDivElement>(null);
@@ -72,7 +47,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
   const reduced = useReducedMotion();
   const dragX = useMotionValue(0);
   const set = sets[index];
-  const initial = useRef({ origin, setId: set.id, image: set.image, objectPosition: set.objectPosition, reduced: !!reduced });
+  const initial = useRef({ origin, originFrame, setId: set.id, image: set.image, objectPosition: set.objectPosition, reduced: !!reduced });
   const running = useRef<Animation[]>([]);
   const ready = useRef(false);
   const phase = useRef<'opening' | 'open' | 'closing'>('opening');
@@ -87,7 +62,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
     const restoreOpener = !!initial.current.origin;
     const previousFocus = initial.current.origin ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const overflow = document.body.style.overflow;
-    const source = initial.current.origin?.dataset.setId && initial.current.origin.dataset.setId !== initial.current.setId ? null : photograph(initial.current.origin);
+    const source = initial.current.origin?.dataset.setId && initial.current.origin.dataset.setId !== initial.current.setId ? null : initial.current.originFrame ?? photograph(initial.current.origin);
     const oldVisibility = source?.frame.style.visibility ?? '';
     element.showModal();
     document.body.style.overflow = 'hidden';

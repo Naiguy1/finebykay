@@ -54,8 +54,11 @@ test('Back closes the reveal in one step, Forward restores the last viewed set, 
   await page.goto('/#work');
   const card = page.getByRole('button', { name: `View ${firstSet.title}`, exact: true });
   await card.scrollIntoViewIfNeeded();
-  const scrollBefore = await page.evaluate(() => scrollY);
+  await card.evaluate((element) => element.addEventListener('click', () => {
+    sessionStorage.setItem('scroll-at-set-open', String(scrollY));
+  }, { capture: true, once: true }));
   await card.click();
+  const scrollBefore = await page.evaluate(() => Number(sessionStorage.getItem('scroll-at-set-open')));
   const dialog = page.getByRole('dialog');
   await expect(page).toHaveURL(new RegExp(`${setPath(firstSet.id)}$`));
   await dialog.getByRole('button', { name: 'Next set', exact: true }).click();

@@ -11,5 +11,5 @@ import { useSetViewer } from './hooks/useSetViewer';
 export default function App() {
   const viewer = useSetViewer();
   const selectedIndex = viewer.selection?.sets.findIndex((set) => set.id === viewer.selection?.id) ?? -1;
-  return <MotionConfig reducedMotion="user" transition={{ type: 'tween', duration: 0.9, ease: [0.22, 1, 0.36, 1] }}><Header /><main id="main"><Hero onOpen={viewer.open} /><Lookbook onOpen={viewer.open} /><Services /><About /></main><Contact />{viewer.selection && selectedIndex >= 0 && <Lightbox sets={viewer.selection.sets} index={selectedIndex} onNavigate={viewer.navigate} onClose={viewer.close} origin={viewer.selection.origin} sharedEntry={viewer.selection.sharedEntry} closing={viewer.closing} onExited={viewer.finishClose} />}</MotionConfig>;
+  return <MotionConfig reducedMotion="user" transition={{ type: 'tween', duration: 0.9, ease: [0.22, 1, 0.36, 1] }}><Header /><main id="main"><Hero onOpen={viewer.open} /><Lookbook onOpen={viewer.open} /><Services /><About /></main><Contact />{viewer.selection && selectedIndex >= 0 && <Lightbox sets={viewer.selection.sets} index={selectedIndex} onNavigate={viewer.navigate} onClose={viewer.close} origin={viewer.selection.origin} originFrame={viewer.selection.originFrame} sharedEntry={viewer.selection.sharedEntry} closing={viewer.closing} onExited={viewer.finishClose} />}</MotionConfig>;
 }
