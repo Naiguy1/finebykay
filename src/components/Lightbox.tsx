@@ -118,6 +118,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
   }, []);
 
   useEffect(() => {
+    setZoomed(false);
     dragX.set(0);
     if (viewport.current) { viewport.current.scrollTop = 0; viewport.current.scrollLeft = 0; }
   }, [set.id, dragX]);

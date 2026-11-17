@@ -24,7 +24,7 @@ function CarouselCard({ set, index, count, width, gap, viewport, offset, progres
   offset: MotionValue<number>;
   progress: MotionValue<number>;
   active: boolean;
-  onOpen: (set: PortfolioSet, origin: HTMLElement) => void;
+  onOpen: (set: PortfolioSet, origin: HTMLElement, keyboard: boolean) => void;
 }) {
   const reduced = useReducedMotion();
   const step = width + gap;
@@ -39,7 +39,7 @@ function CarouselCard({ set, index, count, width, gap, viewport, offset, progres
 
   return (
     <motion.div className="carousel-card" style={{ x, y, rotate, width }}>
-      <button className="carousel-photo-button" data-set-id={set.id} aria-label={`Open ${set.title}`} tabIndex={active ? 0 : -1} onClick={(event) => onOpen(set, event.currentTarget)}>
+      <button className="carousel-photo-button" data-set-id={set.id} aria-label={`Open ${set.title}`} tabIndex={active ? 0 : -1} onClick={(event) => onOpen(set, event.currentTarget, event.detail === 0)}>
       <motion.img
         src={set.image}
         alt=""
@@ -257,17 +257,22 @@ export function HeroCarousel({ progress, onOpen }: { progress: MotionValue<numbe
         onPointerCancel={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
         onLostPointerCapture={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
         onKeyDown={(event) => {
-          if (event.target !== event.currentTarget) return;
+          const photograph = event.target instanceof Element ? event.target.closest('.carousel-photo-button') : null;
+          if (event.target !== event.currentTarget && !photograph) return;
           if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
             event.preventDefault();
-            advance(event.key === 'ArrowRight' ? 1 : -1);
+            const direction = event.key === 'ArrowRight' ? 1 : -1;
+            const next = wrap(2 + Math.round(target.current / step) + direction, heroSets.length);
+            suppressClickUntil.current = 0;
+            advance(direction);
+            if (photograph) event.currentTarget.querySelector<HTMLButtonElement>(`[data-set-id="${heroSets[next].id}"]`)?.focus({ preventScroll: true });
           }
           if (event.key === 'Escape') released.current = true;
         }}
       >
         <div className="carousel-track">
           {cards.map((set, index) => (
-            <CarouselCard key={`${set.id}-${index}`} set={set} index={index} count={cardCount} width={width} gap={gap} viewport={viewport} offset={offset} progress={progress} active={index === active} onOpen={(selected, origin) => { if (performance.now() >= suppressClickUntil.current) { origin.focus({ preventScroll: true }); onOpen(selected.id, heroSets, origin); } }} />
+            <CarouselCard key={`${set.id}-${index}`} set={set} index={index} count={cardCount} width={width} gap={gap} viewport={viewport} offset={offset} progress={progress} active={index === active} onOpen={(selected, origin, keyboard) => { if (keyboard || performance.now() >= suppressClickUntil.current) { origin.focus({ preventScroll: true }); onOpen(selected.id, heroSets, origin); } }} />
           ))}
         </div>
         <p className="sr-only" aria-live="polite" aria-atomic="true">Featured set: {heroSets[active].title}. {heroSets[active].alt}</p>

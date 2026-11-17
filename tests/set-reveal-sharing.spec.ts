@@ -235,3 +235,85 @@ test('reduced motion removes expanding image movement while preserving navigatio
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
+
+test('normal motion expands the selected photograph and settles into the editorial view', async ({ page, isMobile }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const carousel = page.getByRole('region', { name: 'Signature nail sets' });
+  await carousel.scrollIntoViewIfNeeded();
+  const active = await carousel.getAttribute('data-active-set');
+  const activeIndex = portfolio.findIndex((set) => set.id === active);
+  expect(activeIndex).toBeGreaterThanOrEqual(0);
+  const selected = portfolio[(activeIndex + 1) % portfolio.length];
+  // The adjacent photograph carries the carousel's shallow rotation.
+  const card = carousel.getByRole('button', { name: `Open ${selected.title}`, exact: true });
+  await expect.poll(() => card.locator('img').evaluate((image) => image.complete && image.naturalWidth > 0)).toBeTruthy();
+  // Capture the real animation when React inserts its portal, rather than racing
+  // a half-second reveal with an automation round trip.
+  const reveal = await card.evaluate((element) => new Promise<{
+    visible: boolean; duration: number; sourceWidth: number; targetWidth: number; sourceRotation: number; targetRotation: number;
+  }>((resolve) => {
+    const observer = new MutationObserver(() => {
+      const ghost = document.querySelector<HTMLElement>('.lightbox-reveal');
+      const animation = ghost?.getAnimations().find((item) => item.effect instanceof KeyframeEffect);
+      if (!ghost || !animation || !(animation.effect instanceof KeyframeEffect)) return;
+      const frames = animation.effect.getKeyframes();
+      const sourceTransform = new DOMMatrixReadOnly(String(frames[0].transform));
+      const targetTransform = new DOMMatrixReadOnly(String(frames.at(-1)?.transform));
+      observer.disconnect();
+      resolve({
+        visible: getComputedStyle(ghost).visibility === 'visible',
+        duration: Number(animation.effect.getTiming().duration),
+        sourceWidth: Number.parseFloat(String(frames[0].width)),
+        targetWidth: Number.parseFloat(String(frames.at(-1)?.width)),
+        sourceRotation: Math.atan2(sourceTransform.b, sourceTransform.a) * 180 / Math.PI,
+        targetRotation: Math.atan2(targetTransform.b, targetTransform.a) * 180 / Math.PI,
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+    (element as HTMLButtonElement).click();
+  }));
+  expect(reveal.visible).toBeTruthy();
+  expect(reveal.duration).toBeGreaterThanOrEqual(400);
+  expect(reveal.duration).toBeLessThanOrEqual(650);
+  expect(reveal.sourceWidth).toBeGreaterThan(0);
+  expect(reveal.targetWidth).toBeGreaterThan(reveal.sourceWidth + 1);
+  expect(Math.abs(reveal.sourceRotation)).toBeGreaterThan(0.1);
+  expect(Math.abs(reveal.targetRotation)).toBeLessThan(0.01);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.locator('.lightbox-reveal')).toBeHidden();
+  await expect(dialog.locator('.lightbox-media img')).toBeVisible();
+  await expect(dialog.getByRole('heading')).toHaveText(selected.title);
+  await expect.poll(() => dialog.locator('.lightbox-shell').evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+  expect(await dialog.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBeTruthy();
+  await page.screenshot({ path: testInfo.outputPath(`set-reveal-${testInfo.project.name}.png`) });
+  if (isMobile) {
+    await dialog.getByRole('button', { name: 'Share this set', exact: true }).scrollIntoViewIfNeeded();
+    await expect(dialog.getByRole('button', { name: 'Share this set', exact: true })).toBeInViewport();
+    await dialog.getByRole('button', { name: 'Zoom in', exact: true }).scrollIntoViewIfNeeded();
+    await expect(dialog.getByRole('button', { name: 'Zoom in', exact: true })).toBeInViewport();
+    await page.screenshot({ path: testInfo.outputPath(`set-details-${testInfo.project.name}.png`) });
+  }
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(card).toBeFocused();
+});
+
+test('focused carousel photographs support arrow navigation and opening with Enter', async ({ page }) => {
+  await page.goto('/');
+  const carousel = page.getByRole('region', { name: 'Signature nail sets' });
+  const active = await carousel.getAttribute('data-active-set');
+  const activeIndex = portfolio.findIndex((set) => set.id === active);
+  expect(activeIndex).toBeGreaterThanOrEqual(0);
+  const next = portfolio[(activeIndex + 1) % portfolio.length];
+  await carousel.getByRole('button', { name: `Open ${portfolio[activeIndex].title}`, exact: true }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(carousel).toHaveAttribute('data-active-set', next.id);
+  const nextCard = carousel.getByRole('button', { name: `Open ${next.title}`, exact: true });
+  await expect(nextCard).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog').getByRole('heading')).toHaveText(next.title);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(nextCard).toBeFocused();
+});
