@@ -25,6 +25,14 @@ npm run preview
 
 `npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
 
+## Dependency updates and failed checks
+
+Use the pinned Node 22 build environment and `npm ci` with the committed lockfile. Vite, its React plugin, and Tailwind's Vite integration must accept the same Vite major. The current supported stack uses Vite 7; Vite 8 requires a coordinated plugin migration. ESLint, its configuration packages/plugins, and the TypeScript parser also need compatible peer versions. Update React and React DOM together.
+
+Dependabot groups related packages and limits automatic npm updates to patch/minor releases. Major releases remain deliberate migrations: check peer requirements and security advisories, regenerate the lockfile normally, and run the full validation before merging. Do not bypass a peer conflict with `--force` or `--legacy-peer-deps`, and do not disable audit gates to make checks green. If a security fix requires a major upgrade, perform that coordinated migration promptly.
+
+CI validates pull requests and pushes to `main`, avoiding duplicate feature-branch runs. Check the first failed stage: **installation**, **dependency audit**, **content**, **lint**, **build**, **browser installation/tests**, or **container**. A failure before the browser stage means the browser tests have not run. Installation and audit output is preserved in the validation report and uploaded artifacts alongside later-stage logs.
+
 ## Edit names, descriptions, and photos
 
 **Edit `content/sets.yaml`** to change a set's name, description, image description, category, or tags. This is the only authored source for portfolio content. You can edit it directly in GitHub; no React or TypeScript changes are needed.

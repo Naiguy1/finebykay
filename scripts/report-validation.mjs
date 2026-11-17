@@ -4,12 +4,41 @@ import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { stripVTControlCharacters } from 'node:util';
 
-const logs = ['content.log', 'lint.log', 'build.log', 'browser.log', 'container.log'];
+const logs = [
+  ['install.log', 8000],
+  ['dependency-audit.json', 10000],
+  ['dependency-audit-error.log', 2000],
+  ['production-audit.log', 3000],
+  ['browser-install.log', 3000],
+  ['content.log', 3000],
+  ['lint.log', 3000],
+  ['build.log', 3000],
+  ['browser.log', 20000],
+  ['container.log', 3000],
+];
+const stages = [
+  ['REPORT_INSTALL', 'Dependency installation'],
+  ['REPORT_AUDIT', 'Full dependency audit'],
+  ['REPORT_CONTENT', 'Editable content tests'],
+  ['REPORT_LINT', 'Lint'],
+  ['REPORT_BUILD', 'Production build'],
+  ['REPORT_PRODUCTION_AUDIT', 'Production dependency audit'],
+  ['REPORT_BROWSER_INSTALL', 'Browser dependency installation'],
+  ['REPORT_BROWSER', 'Browser tests'],
+  ['REPORT_CONTAINER', 'Production container'],
+];
+
+function stageSummary(environment) {
+  const values = stages.filter(([key]) => environment[key]);
+  if (!values.length) return '';
+  return ['### Validation stages', '', '| Stage | Result |', '| --- | --- |',
+    ...values.map(([key, label]) => `| ${label} | ${environment[key] === 'skipped' ? 'Not run' : environment[key]} |`),
+  ].join('\n');
+}
 
 /** Keep diagnostic text literal, bounded, and readable through the Checks API. */
-export function validationSummary(directory = process.cwd()) {
-  const sections = logs.map((name) => {
-    const perLogLimit = name === 'browser.log' ? 30000 : 4000;
+export function validationSummary(directory = process.cwd(), environment = process.env) {
+  const sections = logs.map(([name, perLogLimit]) => {
     let value;
     try {
       value = readFileSync(join(directory, name), 'utf8');
@@ -25,7 +54,7 @@ export function validationSummary(directory = process.cwd()) {
     if (value.length > perLogLimit) value = `[Earlier output omitted; showing the final ${perLogLimit} characters.]\n${value.slice(-perLogLimit)}`;
     return `### ${name}\n\n\`\`\`text\n${value.trimEnd()}\n\`\`\``;
   });
-  return ['Command output from this validation run. The **validate** job remains the authoritative result.', ...sections].join('\n\n');
+  return ['Command output from this validation run. The **validate** job remains the authoritative result. Full logs are retained in the run artifacts.', stageSummary(environment), ...sections].filter(Boolean).join('\n\n');
 }
 
 export async function publishValidation(environment = process.env, fetchRequest = globalThis.fetch) {
@@ -52,7 +81,7 @@ export async function publishValidation(environment = process.env, fetchRequest 
       details_url: `${environment.GITHUB_SERVER_URL || 'https://github.com'}/${repository}/actions/runs/${environment.GITHUB_RUN_ID}`,
       output: {
         title: `Validation ${conclusion}`,
-        summary: validationSummary(),
+        summary: validationSummary(process.cwd(), environment),
       },
     }),
   });
