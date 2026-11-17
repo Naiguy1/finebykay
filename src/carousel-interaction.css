@@ -1,0 +1,6 @@
+.carousel-photo-button { pointer-events: auto; display: block; width: 100%; height: 100%; padding: 0; border-radius: inherit; overflow: hidden; text-align: left; }
+.carousel-photo-button:focus-visible { outline-offset: -5px; outline-color: var(--cream); }
+.carousel-photo-button img { height: 100%; }
+@media (hover: hover) and (pointer: fine) {
+  .carousel-photo-button { cursor: zoom-in; }
+}

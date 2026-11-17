@@ -1,0 +1,178 @@
+# FINEBYKAY — EDIT YOUR NAIL SETS HERE
+# Save this file, then rebuild and deploy the website to publish your changes.
+# Keep each id unchanged: it is the permanent link people share.
+# name = visible title; description = the short story beside the photograph.
+# image_description = accessible text describing what is actually visible.
+# The descriptions below are editable filler copy. Replace them whenever you like.
+# You can write descriptions across several indented lines after >-.
+# Categories: Natural Nails | Structured Gel | Intricate Art
+# Copy an entire entry to add a set, give it a NEW id, and add its photo in public/media/.
+# Optional fields: high_resolution, image_position (e.g. "50% 50%"), video.
+
+- id: teal-black-filigree
+  name: "Butterfly wing tips"
+  description: >-
+    A little color, a few thoughtful details, and a look with its own personality. An invitation to find inspiration in the small things.
+  category: Intricate Art
+  image: "/media/01_Teal_Black_Filigree.jpg"
+  image_description: >-
+    Teal butterfly wing patterns outlined with white dots, paired with glossy black French tips.
+  tags:
+    - "Butterfly wing art"
+    - "Black French tips"
+
+- id: black-gold-plaid
+  name: "Caramel plaid"
+  description: >-
+    A tiny canvas for a new idea. Explore the details up close and save this set for a little everyday inspiration.
+  category: Intricate Art
+  image: "/media/02_Black_Gold_Plaid.jpg"
+  image_description: >-
+    Caramel brown and glossy black nails with white plaid accents crossed by fine gold lines.
+  tags:
+    - "Plaid detail"
+    - "Gold accents"
+
+- id: pink-floral
+  name: "Pink bows and stars"
+  description: >-
+    A playful collection of details with a personality of its own. Take a closer look and find your favorite little moment.
+  category: Intricate Art
+  image: "/media/04_Pink_Floral.jpg"
+  image_description: >-
+    Pink and white nails with painted bows, delicate starbursts, dotted details, and swirl accents.
+  tags:
+    - "Bow art"
+    - "Pink and white"
+
+- id: neutral-bow
+  name: "Neutral patchwork bows"
+  description: >-
+    Small details come together in a look made to be enjoyed up close. Share this set with someone who loves a little nail inspiration.
+  category: Intricate Art
+  image: "/media/05_Neutral_Bow_Art.jpg"
+  image_description: >-
+    Almond nails in beige, taupe, and sage with patchwork florals, checks, dots, hearts, and brown bow details.
+  tags:
+    - "Bow art"
+    - "Patchwork patterns"
+
+- id: cobalt-white
+  name: "Cobalt mix and match"
+  description: >-
+    A little color, a few thoughtful details, and a look with its own personality. An invitation to find inspiration in the small things.
+  category: Intricate Art
+  image: "/media/06_Cobalt_White_Art.jpg"
+  image_description: >-
+    Cobalt blue and white nails with bows, plaid, stars, floral shapes, and abstract accents.
+  tags:
+    - "Cobalt"
+    - "Mix-and-match art"
+
+- id: red-white-hearts
+  name: "Valentine red tips"
+  description: >-
+    A tiny canvas for a new idea. Explore the details up close and save this set for a little everyday inspiration.
+  category: Intricate Art
+  image: "/media/07_Red_White_Hearts.jpg"
+  image_description: >-
+    Sheer nails with red and white French tips, tiny hearts, bows, lace-like borders, and “xoxo” lettering.
+  tags:
+    - "Valentine details"
+    - "Red French tips"
+
+- id: strawberry-floral
+  name: "Strawberry florals"
+  description: >-
+    A playful collection of details with a personality of its own. Take a closer look and find your favorite little moment.
+  category: Intricate Art
+  image: "/media/08_Pink_Strawberry_Floral.jpg"
+  image_description: >-
+    Pink strawberry and floral nail art
+  tags:
+    - "Strawberry art"
+    - "Floral detail"
+
+- id: red-blue-botanical
+  name: "Cherry gingham mix"
+  description: >-
+    Small details come together in a look made to be enjoyed up close. Share this set with someone who loves a little nail inspiration.
+  category: Intricate Art
+  image: "/media/09_Red_Blue_Botanical.jpg"
+  image_description: >-
+    Sheer nails with red daisies and cherries, blue gingham checks, and playful red, white, and blue accents.
+  tags:
+    - "Cherry art"
+    - "Blue gingham"
+
+- id: aqua-french-tips
+  name: "Wavy aqua French tips"
+  description: >-
+    A little color, a few thoughtful details, and a look with its own personality. An invitation to find inspiration in the small things.
+  category: Natural Nails
+  image: "/media/10_Aqua_French_Tips.jpg"
+  image_description: >-
+    Sheer pink almond nails with wavy French tips alternating between aqua green and pale blue.
+  tags:
+    - "Wavy French tips"
+    - "Aqua and blue"
+
+- id: gold-fleck
+  name: "Gold foil and shimmer"
+  description: >-
+    A tiny canvas for a new idea. Explore the details up close and save this set for a little everyday inspiration.
+  category: Intricate Art
+  image: "/media/11_Gold_Fleck_Art.jpg"
+  image_description: >-
+    Champagne gold shimmer nails with sheer accent nails decorated in flowing gold foil.
+  tags:
+    - "Gold foil"
+    - "Shimmer"
+
+- id: jewel-tones
+  name: "Jewel tones"
+  description: >-
+    A playful collection of details with a personality of its own. Take a closer look and find your favorite little moment.
+  category: Intricate Art
+  image: "/media/12_Jewel_Tone_Art.jpg"
+  image_description: >-
+    Jewel tone nail art
+  tags:
+    - "Jewel tones"
+    - "Custom art"
+
+- id: warm-soft-light
+  name: "Spider-Man web art"
+  description: >-
+    Small details come together in a look made to be enjoyed up close. Share this set with someone who loves a little nail inspiration.
+  category: Intricate Art
+  image: "/media/Luxury%20manicure%20in%20warm%20soft%20light-2.jpg"
+  image_description: >-
+    Red and blue nails with black character art and white web patterns inspired by Spider-Man.
+  tags:
+    - "Comic-inspired art"
+    - "Web details"
+
+- id: warm-backdrop
+  name: "Mixed pattern manicure"
+  description: >-
+    A little color, a few thoughtful details, and a look with its own personality. An invitation to find inspiration in the small things.
+  category: Intricate Art
+  image: "/media/Luxury%20nail%20art%20on%20a%20warm%20backdrop-3.jpg"
+  image_description: >-
+    Blush and sage nails featuring bows, botanical motifs, plaid, stripes, and dotted French tips.
+  tags:
+    - "Mix-and-match art"
+    - "Plaid and stripes"
+
+- id: warm-surface
+  name: "Planetarium nails"
+  description: >-
+    A tiny canvas for a new idea. Explore the details up close and save this set for a little everyday inspiration.
+  category: Intricate Art
+  image: "/media/Luxury%20nail%20art%20on%20a%20warm%20surface-1.jpg"
+  image_description: >-
+    Black nails with white dots and colorful hand-painted planets across the tips.
+  tags:
+    - "Space art"
+    - "Planet details"
