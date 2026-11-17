@@ -176,3 +176,20 @@
   tags:
     - "Space art"
     - "Planet details"
+
+- id: holiday-botanicals
+  name: "Holiday botanicals"
+  description: >-
+    Evergreen sprigs, tiny red berries, and ribbon bows bring a little holiday
+    magic to a sheer base. Glossy crimson and buttery yellow cable-knit accents
+    add a cozy finish, with delicate gold touches catching the light.
+  category: Intricate Art
+  image: "/media/holiday_nails.png"
+  image_description: >-
+    Almond-shaped nails with glossy red polish, deep green botanical accents
+    with red berries, raised butter-yellow cable-knit texture, and red bows
+    on sheer nude bases, resting on ivory fabric.
+  tags:
+    - "Holiday botanicals"
+    - "Cable-knit texture"
+    - "Ribbon bows"
