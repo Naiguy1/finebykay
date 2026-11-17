@@ -255,7 +255,11 @@ export function HeroCarousel({ progress, onOpen }: { progress: MotionValue<numbe
           moveTo(current.snap + (swiped ? (dx < 0 ? step : -step) : 0));
         }}
         onPointerCancel={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
-        onLostPointerCapture={(event) => { if (gesture.current?.id === event.pointerId) cancelGesture(); }}
+        onLostPointerCapture={(event) => {
+          // Transferring the photograph's implicit touch capture to this region
+          // emits a bubbling loss event from the photograph while we own capture.
+          if (gesture.current?.id === event.pointerId && !event.currentTarget.hasPointerCapture(event.pointerId)) cancelGesture();
+        }}
         onKeyDown={(event) => {
           const photograph = event.target instanceof Element ? event.target.closest('.carousel-photo-button') : null;
           if (event.target !== event.currentTarget && !photograph) return;
