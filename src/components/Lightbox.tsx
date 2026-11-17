@@ -84,6 +84,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
     const media = viewport.current!;
     phase.current = 'opening';
     ready.current = false;
+    const restoreOpener = !!initial.current.origin;
     const previousFocus = initial.current.origin ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const overflow = document.body.style.overflow;
     const source = initial.current.origin?.dataset.setId && initial.current.origin.dataset.setId !== initial.current.setId ? null : photograph(initial.current.origin);
@@ -123,7 +124,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, closing = f
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
       // React restores commit-time focus after layout cleanup; restore the opener
       // once the portal is removed, without stealing focus from a newer viewer.
-      if (initial.current.origin) requestAnimationFrame(() => {
+      if (restoreOpener) requestAnimationFrame(() => {
         if (previousFocus?.isConnected && !document.querySelector('dialog[open]')) previousFocus.focus({ preventScroll: true });
       });
     };
