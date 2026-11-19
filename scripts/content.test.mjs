@@ -71,3 +71,15 @@ test('builds per-set metadata and a readable no-JavaScript fallback with safe es
   assert.equal((html.match(/rel="canonical"/g) ?? []).length, 1);
   assert.match(html, /src="\/assets\/app\.js"/);
 });
+
+test('lookbook ordering is optional, positive, and unique without excluding carousel entries', () => {
+  assert.equal(parse(source)[0].lookbookOrder, undefined);
+  const featured = source.replace('  category:', '  lookbook_order: 2\n  category:');
+  assert.equal(parse(featured)[0].lookbookOrder, 2);
+  const unfeatured = source.replace('first-set', 'second-set');
+  assert.equal(parse(featured + unfeatured).length, 2);
+  for (const value of ['0', '-1', '1.5', '"1"', 'true', 'null']) {
+    assert.throws(() => parse(featured.replace('lookbook_order: 2', `lookbook_order: ${value}`)), /positive whole number/);
+  }
+  assert.throws(() => parse(featured + featured.replace('first-set', 'second-set')), /must be unique/);
+});
