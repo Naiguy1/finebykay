@@ -4,15 +4,18 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 import time
+import re
+from urllib.request import Request
 
 BASE = "http://127.0.0.1:8080"
-EXPECTED = {
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "X-Frame-Options": "SAMEORIGIN",
-    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; media-src 'self'; connect-src 'self'",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
-}
+# Share expected values with the checked-in server policy; assert key protections
+# separately in the Node security baseline tests.
+EXPECTED = {}
+for line in Path("config/security-headers.conf").read_text().splitlines():
+    match = re.fullmatch(r'add_header ([A-Za-z-]+) (.+) always;', line)
+    if match:
+        EXPECTED[match[1]] = match[2].strip('"')
+
 
 
 def request(path):
@@ -23,6 +26,8 @@ def request(path):
 
 
 def check_headers(response):
+    assert response.headers.get("Access-Control-Allow-Origin") is None
+    assert response.headers.get("Set-Cookie") is None
     for name, expected in EXPECTED.items():
         assert response.headers.get(name) == expected, (response.url, name, dict(response.headers))
 
@@ -86,3 +91,27 @@ with request("/missing-review-asset.js") as response:
     check_headers(response)
 
 print("Production HTTP checks passed: home/set pages/assets/404 headers, sharing metadata, immutable caching, asset MIME types.")
+
+
+# Legal/help pages must be real, script-free documents on the static server.
+for slug in ("privacy", "terms", "cookies", "privacy-requests", "accessibility"):
+    with request(f"/{slug}/") as response:
+        assert response.status == 200
+        check_headers(response)
+        html = response.read().decode()
+        assert '<script' not in html
+        assert 'Draft for legal review' in html
+        assert 'aria-label="Policies and help"' in html
+for path in ('/.env', '/.git/config', '/content/sets.yaml', '/assets/private.key', '/api/account', '/missing-review-asset.js'):
+    with request(path) as response:
+        assert response.status == 404, path
+        check_headers(response)
+for method in ('POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'):
+    try:
+        response = urlopen(Request(BASE + '/', method=method), timeout=3)
+    except HTTPError as error:
+        response = error
+    with response:
+        assert response.status == 405, method
+        check_headers(response)
+print("Privacy and hardening checks passed: policies, private files, absent APIs, read-only methods, no cookies/CORS.")

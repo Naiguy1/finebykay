@@ -17,12 +17,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
       - name: Check CI diagnostics
         run: node --test scripts/report-validation.test.mjs
+      - name: Check security and privacy baseline
+        id: security
+        run: |
+          set -o pipefail
+          npm run test:security 2>&1 | tee security.log
+        shell: bash
       - name: Install dependencies
         id: install
         run: |
@@ -91,9 +98,10 @@ jobs:
             for attempt in 1 2 3; do
               docker rm -f finebykay-ci >/dev/null 2>&1 || true
               if docker build -t finebykay-ci . &&
-                docker run -d --name finebykay-ci -p 127.0.0.1:8080:8080 finebykay-ci &&
+                docker run -d --name finebykay-ci --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m,mode=1777 --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 100 --memory 128m -p 127.0.0.1:8080:8080 finebykay-ci &&
                 docker exec finebykay-ci nginx -t &&
-                python3 scripts/check_static_host.py; then
+                python3 scripts/check_static_host.py &&
+                node scripts/check-production-browser.mjs; then
                 passed=1
                 break
               fi
@@ -112,6 +120,7 @@ jobs:
           REPORT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           REPORT_STATUS: ${{ job.status }}
           REPORT_INSTALL: ${{ steps.install.outcome }}
+          REPORT_SECURITY: ${{ steps.security.outcome }}
           REPORT_AUDIT: ${{ steps.audit.outcome }}
           REPORT_CONTENT: ${{ steps.content.outcome }}
           REPORT_LINT: ${{ steps.lint.outcome }}
@@ -128,6 +137,7 @@ jobs:
             dist/
             package-lock.json
             install.log
+            security.log
             dependency-audit.json
             dependency-audit-error.log
             production-audit.log
@@ -139,3 +149,4 @@ jobs:
             container.log
             test-results/
           retention-days: 7
+

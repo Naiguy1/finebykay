@@ -10,3 +10,10 @@ playwright-report
 *.key
 id_rsa*
 id_ed25519*
+*.p12
+*.pfx
+*.db
+*.sqlite*
+__pycache__
+*.pyc
+

@@ -18,10 +18,11 @@ export function Lookbook({ onOpen }: { onOpen: (id: string, sets: readonly Portf
     <motion.div className="portfolio-grid" layout={!reduced}>
       <AnimatePresence mode="popLayout" initial={false}>{filtered.map((set) => <motion.article key={set.id} layout={!reduced} initial={{ opacity: 0, y: reduced ? 0 : 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : 0.8 }}>
         <button className="portfolio-card group" aria-label={`View ${set.title}`} data-set-id={set.id} onClick={(event) => { if (currentCategory.current === 'All' || set.category === currentCategory.current) onOpen(set.id, filtered, event.currentTarget); }}>
-          <span className="portfolio-photo"><motion.img src={set.image} alt={set.alt} width="900" height="1200" loading="lazy" style={{ objectPosition: set.objectPosition }} initial={{ scale: reduced ? 1 : 1.06 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: reduced ? 0 : 1.1 }} /><span className="photo-number">{String(lookbookSets.indexOf(set) + 1).padStart(2, '0')}</span><span className="photo-plus"><Plus size={22} strokeWidth={1.3} /></span></span>
+          <span className="portfolio-photo"><motion.img src={set.image} alt={set.alt} width="900" height="1200" loading="lazy" style={{ objectPosition: set.objectPosition }} initial={{ scale: reduced ? 1 : 1.06 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: reduced ? 0 : 1.1 }} /><span className="photo-number" aria-hidden="true">{String(lookbookSets.indexOf(set) + 1).padStart(2, '0')}</span><span className="photo-plus" aria-hidden="true"><Plus size={22} strokeWidth={1.3} /></span></span>
           <span className="portfolio-caption"><span>{set.title}</span><span>{set.category}</span></span>
         </button>
       </motion.article>)}</AnimatePresence>
     </motion.div>
   </section>;
 }
+

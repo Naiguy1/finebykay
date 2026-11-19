@@ -221,7 +221,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, originFrame
           <motion.div className="lightbox-swipe" style={{ x: dragX }}>
             <AnimatePresence mode="wait" initial={false} custom={direction}>
               <motion.div key={set.id} className="lightbox-media" custom={direction} variants={{ enter: (value: number) => ({ opacity: 0, x: reduced ? 0 : value * 28 }), visible: { opacity: 1, x: 0 }, exit: (value: number) => ({ opacity: 0, x: reduced ? 0 : value * -28 }) }} initial="enter" animate="visible" exit="exit" transition={{ duration: reduced ? 0 : 0.2 }}>
-                {set.video ? <video controls playsInline preload="metadata" poster={set.image} src={set.video} aria-label={set.title} /> : <img src={set.highRes ?? set.image} alt={set.alt} width="1200" height="1600" />}
+                {set.video ? <video controls playsInline preload="metadata" poster={set.image} src={set.video} aria-label={set.title} aria-describedby="video-description"><track kind="captions" src={set.captions} srcLang="en" label="English" default /></video> : <img src={set.highRes ?? set.image} alt={set.alt} width="1200" height="1600" />}
               </motion.div>
             </AnimatePresence>
           </motion.div>
@@ -229,6 +229,7 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, originFrame
         <div className="lightbox-bottom">
           <div className="lightbox-story" key={`story-${set.id}`}><p className="eyebrow">{set.category}</p><h2 id="lightbox-title">{set.title}</h2><p className="lightbox-tags">{set.tags.join(' · ')}</p><p className="lightbox-description">{set.description}</p></div>
           <ShareSet key={`share-${set.id}`} set={set} />
+          {set.video && <p id="video-description" className="lightbox-description">{set.videoDescription}</p>}
           {sharedEntry && <button className="lightbox-explore" onClick={onClose}>Explore more work <ArrowUpRight size={16} aria-hidden="true" /></button>}
           <div className="lightbox-controls"><button className="icon-button" aria-label="Previous set" onClick={() => navigate(index - 1)}><ArrowLeft size={20} /></button><span aria-live="polite" aria-atomic="true">{String(index + 1).padStart(2, '0')} / {String(sets.length).padStart(2, '0')}</span><button className="icon-button" aria-label="Next set" onClick={() => navigate(index + 1)}><ArrowRight size={20} /></button>{!set.video && <button className="icon-button" aria-label={zoomed ? 'Zoom out' : 'Zoom in'} aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOut size={20} /> : <ZoomIn size={20} />}</button>}</div>
           <p id="lightbox-instructions" className="lightbox-hint">{zoomed ? 'Arrow keys to pan · Tab for gallery controls · Escape to close' : 'Arrow keys or swipe to explore · Escape to close'}</p>
@@ -238,3 +239,4 @@ export function Lightbox({ sets, index, onNavigate, onClose, origin, originFrame
     <div ref={ghost} className="lightbox-reveal" aria-hidden="true"><img src={initial.current.image} style={{ objectPosition: initial.current.objectPosition }} alt="" /></div>
   </dialog>, document.body);
 }
+

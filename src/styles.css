@@ -21,6 +21,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button:disabled { cursor: default; }
 button { background: none; border: 0; }
 button:focus-visible, a:focus-visible, video:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+[tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+[hidden] { display: none !important; }
 img { display: block; width: 100%; object-fit: cover; }
 h1,h2,h3,p { margin: 0; }
 h1,h2,h3 { font-family: var(--font-display); font-weight: 400; }
@@ -68,7 +70,7 @@ svg { flex-shrink: 0; }
 .hero-card-2 { margin-top: 49px; }
 .hero-card-3 { margin-top: 26px; rotate: -3deg; }
 .hero-card-4 { rotate: -5deg; }
-.hero-card-index { position: absolute; top: 20px; left: 20px; color: white; font-size: 10px; letter-spacing: .1em; mix-blend-mode: difference; }
+.hero-card-index { position: absolute; top: 20px; left: 20px; color: var(--cream); background: var(--ink); padding: 5px 7px; border-radius: 4px; font-size: 12px; letter-spacing: .1em; }
 .scroll-circle { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 78px; height: 78px; border: 7px solid var(--cream); border-radius: 50%; display: grid; place-items: center; background: var(--cream); color: var(--accent); z-index: 2; box-shadow: 0 5px 24px #1e1b1810; transition: background .7s; }
 .scroll-circle:hover { background: var(--linen); }
 .hero-footnote { margin: 27px 5.5vw 0; padding: 0 0 36px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--hairline); font-size: 10px; color: var(--muted); }
@@ -88,7 +90,7 @@ svg { flex-shrink: 0; }
 .portfolio-photo { display: block; aspect-ratio: 3/4; overflow: hidden; position: relative; border-radius: 30px; background: var(--linen); }
 .portfolio-photo img { height: 100%; transition: filter 1s var(--ease); }
 .portfolio-card:hover img { filter: brightness(.96); }
-.photo-number { position: absolute; left: 23px; top: 23px; font-size: 10px; color: white; mix-blend-mode: difference; }
+.photo-number { position: absolute; left: 23px; top: 23px; font-size: 12px; color: var(--cream); background: var(--ink); padding: 5px 7px; border-radius: 4px; }
 .photo-plus { width: 42px; height: 42px; display: grid; place-items: center; position: absolute; right: 18px; bottom: 18px; background: #faf6f0eb; border-radius: 50%; transition: transform .8s var(--ease); }
 .portfolio-card:hover .photo-plus { transform: rotate(90deg); }
 .portfolio-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 19px 2px 0; }
@@ -274,4 +276,37 @@ svg { flex-shrink: 0; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .hero-card { transform: none !important; }
+}
+
+
+/* Legal/help pages remain usable without JavaScript or third-party assets. */
+.policy-links { display: flex; justify-content: center; gap: 8px 24px; flex-wrap: wrap; margin-top: 28px; font-size: 13px; line-height: 1.8; }
+.policy-links a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; }
+.policy-page { font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+.policy-page > header, .policy-page > main, .policy-page > footer { width: min(100% - 40px, 800px); margin-inline: auto; }
+.policy-page > header { padding-block: 28px; }
+.policy-page > main { padding-block: 24px 48px; }
+.policy-page h1 { font-size: clamp(40px, 8vw, 64px); line-height: 1.15; margin-bottom: 24px; }
+.policy-page h2 { font-size: clamp(28px, 5vw, 36px); line-height: 1.25; letter-spacing: -.02em; margin-block: 36px 16px; }
+.policy-page p + p { margin-top: 16px; }
+.policy-page p a, .policy-page footer > a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.policy-page > footer { border-top: 1px solid var(--hairline); padding-bottom: 36px; }
+.policy-page .policy-links { justify-content: flex-start; margin-bottom: 24px; }
+.policy-draft { border: 2px solid var(--accent); padding: 18px; background: var(--linen); }
+/* Wrapping preserves labels at 200% text size and a 320 CSS-pixel viewport. */
+.portfolio-caption { flex-wrap: wrap; }
+.portfolio-caption > span:last-child { white-space: normal; }
+.header-social, .button, .filter-button, .carousel-toolbar p, .carousel-toolbar p span,
+.portfolio-caption > span:last-child, .service-row > p, .about-paragraph,
+.contact-description, .lightbox-description, .lightbox-hint, .set-share-status,
+.set-copy-button, .set-share-button, .footer-bottom > span, .footer-bottom > a:not(.wordmark),
+.footer-fineprint { font-size: 12px; }
+@media (max-width: 380px) {
+  .header-social { padding: 10px 6px; gap: 4px; border: 0; }
+  .site-header { gap: 8px; }
+}
+@media (forced-colors: active) {
+  button, .button, .filter-button { border: 1px solid ButtonText; }
+  .filter-button[aria-pressed='true'] { border: 3px solid Highlight; }
+  .carousel-photo-button:focus-visible { outline-color: Highlight; }
 }

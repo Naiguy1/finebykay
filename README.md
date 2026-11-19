@@ -23,7 +23,7 @@ npm run test:e2e
 npm run preview
 ```
 
-`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
+`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers, and exercises the carousel/detail view and policies under the actual production CSP. The workflow does not deploy the site.
 
 ## Dependency updates and failed checks
 
@@ -103,15 +103,11 @@ npm run build
 
 Serve the **contents of `dist/`** from any static web server at `https://nails.bowerbanks.com/`. Assets and fonts are included. The build includes the homepage and one real HTML directory per set. Serve directory indexes normally; no application server or catch-all route is needed. Configure your DNS and HTTPS with your hosting provider. Canonical, Open Graph, robots, and sitemap URLs already use `nails.bowerbanks.com`.
 
-Example Caddy configuration when serving a copied `dist/` directory:
-
-```caddyfile
-nails.bowerbanks.com {
-    root * /srv/finebykay/dist
-    encode zstd gzip
-    file_server
-}
-```
+For direct Caddy static hosting, use **`config/Caddyfile.static`** and set its root to
+your deployed `dist/` directory. It includes HTTPS via Caddy, security headers and read-only
+method/private-file restrictions. A bare file-server configuration omits these protections.
+Validate it with `caddy validate --config /path/to/Caddyfile` and verify the public response
+headers after deployment. When proxying to the supplied Docker image, use the example below.
 
 ## Self-host with Docker
 
@@ -134,3 +130,50 @@ If the reverse proxy also runs in Docker, attach both services to a shared Docke
 ## Source ownership
 
 This is a new implementation based on the supplied design brief and screenshots, not an export of Framer's proprietary project or its template source. No template code or museum photographs are included. Fonts retain their upstream licenses in the installed Fontsource packages. No open-source license for the original site code is assumed; the repository owner can add one if desired.
+
+
+## Security, privacy, accessibility, and legal review
+
+Read **[the full audit and owner checklist](docs/security-privacy-accessibility-audit.md)**
+and **[future feature safety requirements](docs/feature-safety.md)** before adding booking,
+accounts, payments, email, uploads or tracking. The current static site has no private
+records, tracking or cookies, and deliberately denies writes/network connections/frames.
+It does not need a cookie banner while there are no optional services. New features need
+real server-side enforcement and updated reviews before those restrictions change.
+
+Legal/help text is editable in **`content/legal.json`**. The build creates script-free
+`/privacy/`, `/terms/`, `/cookies/`, `/privacy-requests/` and `/accessibility/` pages, linked
+from the global footer even without JavaScript. They are conspicuous draft templates,
+with bracketed company/contact/jurisdiction/provider/retention fields for owner/counsel
+review. A current Instagram request workflow is documented; configure an accessible
+non-Instagram contact channel and response owner before policy approval.
+
+```bash
+npm run test:security   # current files, fetched git history, privacy/license baselines
+npm run test:content
+npm run lint
+npm run build
+npm run test:e2e
+```
+
+CI fetches full history for scanning. A local scan covers only the refs you have fetched.
+No actual secret was identified by this review; pattern scanning cannot prove absence.
+`.env` files are ignored, but **VITE_* variables are public browser build values** and must
+never contain secrets. The current site needs no `.env` credentials. Future backend
+credentials belong in its server-only secret manager, never the frontend or public files.
+
+Nginx uses a shared header file (`config/security-headers.conf`) including one-year HSTS.
+Your public TLS proxy must redirect HTTP and preserve those headers on HTML/assets/errors.
+Inline styles are allowed for Motion; executable inline scripts remain blocked. Do not
+add wildcard CORS or broad CSP exceptions. Application access logs are disabled; inspect
+host/proxy/CDN logging and retention separately. The Compose runtime is read-only with a
+bounded writable `/tmp`, dropped capabilities, no-new-privileges and resource limits.
+
+The build copies production software license notices to
+`dist/licenses/third-party-software.txt`; font OFL licenses remain in `dist/licenses/`.
+Runtime software uses MIT/ISC/0BSD or OFL-1.1. Build-only MPL-2.0/CC-BY-4.0/Python-2.0
+exceptions are explicit in the license gate; see THIRD_PARTY_NOTICES.md.
+
+When adding a local portfolio `video`, also supply `captions: /media/detail.vtt` and
+`video_description:` describing the visuals. The build requires both; review the actual
+caption/transcript/audio-description quality before publishing.
