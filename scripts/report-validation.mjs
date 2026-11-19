@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { stripVTControlCharacters } from 'node:util';
 
 const logs = [
+  ['security.log', 5000],
   ['install.log', 8000],
   ['dependency-audit.json', 10000],
   ['dependency-audit-error.log', 2000],
@@ -17,6 +18,7 @@ const logs = [
   ['container.log', 3000],
 ];
 const stages = [
+  ['REPORT_SECURITY', 'Security and privacy baseline'],
   ['REPORT_INSTALL', 'Dependency installation'],
   ['REPORT_AUDIT', 'Full dependency audit'],
   ['REPORT_CONTENT', 'Editable content tests'],
@@ -95,3 +97,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exitCode = 1;
   });
 }
+

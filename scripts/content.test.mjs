@@ -83,3 +83,15 @@ test('lookbook ordering is optional, positive, and unique without excluding caro
   }
   assert.throws(() => parse(featured + featured.replace('first-set', 'second-set')), /must be unique/);
 });
+
+
+test('requires accessible video alternatives and bounds authored content', () => {
+  const video = source + '  video: /media/detail.mp4\n';
+  assert.throws(() => parse(video), /captions/);
+  assert.throws(() => parse(video + '  captions: /media/detail.vtt\n'), /video_description/);
+  const [set] = parse(video + '  captions: /media/detail.vtt\n  video_description: A slow close-up of the painted flowers.\n');
+  assert.equal(set.captions, '/media/detail.vtt');
+  assert.throws(() => parse(source + '  image_position: "url(https://example.com)"\n'), /two percentages/);
+  assert.equal(parse(source + '  image_position: "50% 100%"\n')[0].objectPosition, '50% 100%');
+  assert.throws(() => parse(source.replace('A new name', 'x'.repeat(4001))), /too long/);
+});

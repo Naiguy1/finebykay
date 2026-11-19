@@ -18,6 +18,8 @@ export interface PortfolioSet {
   lookbookOrder?: number;
   /** Optional local MP4/WebM shown in the detail view, never autoplayed. */
   video?: string;
+  captions?: string;
+  videoDescription?: string;
 }
 
 // Generated from content/sets.yaml. Edit that file, then rebuild.
@@ -46,3 +48,4 @@ export const services = [
   { number: '02', title: 'Structured gel', description: 'A gel overlay to add support to your natural nails.', detail: 'Gel overlay' },
   { number: '03', title: 'Intricate custom art', description: 'Hand-painted florals, patterns, characters, and custom designs.', detail: 'Hand-painted designs' },
 ] as const;
+

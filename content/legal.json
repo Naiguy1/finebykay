@@ -1,0 +1,162 @@
+[
+  {
+    "slug": "privacy",
+    "title": "Privacy Policy",
+    "sections": [
+      {
+        "heading": "Who is responsible",
+        "paragraphs": [
+          "[COMPANY NAME] operates finebykay. Business/contact address: [BUSINESS CONTACT ADDRESS]. Privacy contact: [CONTACT EMAIL]. Applicable jurisdiction and effective date: [JURISDICTION] / [EFFECTIVE DATE]. These fields require legal review."
+        ]
+      },
+      {
+        "heading": "What this site does today",
+        "paragraphs": [
+          "This website displays a nail-art portfolio and links to @finebykay on Instagram. It has no account registration, online booking, checkout, newsletter form, or visitor uploads. It does not ask you to submit personal information on this website.",
+          "Photographs, fonts, and scripts are served from this site. We have not installed analytics, advertising pixels, session replay, or third-party embeds. The site does not set application cookies or use browser storage to track visitors."
+        ]
+      },
+      {
+        "heading": "Hosting and external services",
+        "paragraphs": [
+          "Your browser sends technical information, including your IP address, to the hosting infrastructure to load the website. Application access logging is disabled in the supplied Nginx configuration. Hosting providers, reverse proxies, error reporting, and infrastructure logs need separate review: [HOSTING PROVIDER], [SECURITY LOG PURPOSE AND LEGAL BASIS], [LOG RETENTION PERIOD], [RECIPIENTS AND TRANSFER SAFEGUARDS].",
+          "Instagram opens only when you follow a link. Your interactions there are handled under Instagram’s own policies. Do not send payment card details, identification documents, or health information in a direct message."
+        ]
+      },
+      {
+        "heading": "Information you send us directly",
+        "paragraphs": [
+          "If you contact @finebykay on Instagram, the studio receives your message and the profile information you choose to share. Use only the information needed for your question. [CONFIRM MESSAGE PURPOSES, LAWFUL BASIS, ACCESS, RETENTION, AND DELETION PROCESS]. Photographs used in the portfolio require the studio’s permission and rights review."
+        ]
+      },
+      {
+        "heading": "Your privacy choices and deletion requests",
+        "paragraphs": [
+          "Use the Privacy requests link below for the current request process. You may request access, correction, or deletion of information you sent the studio, subject to identity verification and any applicable recordkeeping obligations. [CONFIRM APPLICABLE RIGHTS, RESPONSE DEADLINES, APPEAL PROCESS, REGULATOR CONTACT, AND RETENTION EXCEPTIONS]."
+        ]
+      },
+      {
+        "heading": "Children, changes, and future services",
+        "paragraphs": [
+          "This portfolio has no signup or age-verification form. [CONFIRM INTENDED AUDIENCE, MINOR SERVICE POLICY, AND GUARDIAN REQUIREMENTS WITH COUNSEL].",
+          "Booking, accounts, payments, marketing, uploads, or optional tracking must receive a separate privacy and security review before launch. This template does not describe those features as already operating. [FINALIZE POLICY CHANGE NOTICE PROCESS]."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "terms",
+    "title": "Terms of Service",
+    "sections": [
+      {
+        "heading": "Operator and scope",
+        "paragraphs": [
+          "[COMPANY NAME], [BUSINESS CONTACT ADDRESS], [CONTACT EMAIL], [JURISDICTION], [EFFECTIVE DATE]. This template requires legal review before it is adopted as the studio’s terms."
+        ]
+      },
+      {
+        "heading": "Portfolio and appointments",
+        "paragraphs": [
+          "This site provides examples of nail art and general service information. It does not accept online bookings or payments. Contact @finebykay on Instagram to discuss availability and the final service price.",
+          "[CONFIRM CURRENCY, TAXES, DEPOSITS, CANCELLATION, RESCHEDULING, NO-SHOW, REFUND, AND SERVICE ELIGIBILITY TERMS BEFORE TAKING BOOKINGS]. No subscription or recurring billing is offered on this site."
+        ]
+      },
+      {
+        "heading": "Photos and permitted use",
+        "paragraphs": [
+          "[CONFIRM OWNERSHIP OR COMMERCIAL PERMISSION FOR ALL PHOTOGRAPHS, DESIGNS, TRADEMARKS, AND CLIENT LIKENESSES]. Viewing or sharing a page link does not itself grant a license to reuse the photographs. Contact the studio through the reporting process below about permission or a concern.",
+          "There is no public posting or upload function. [BEFORE ADDING USER CONTENT, REVIEW THE CONTENT LICENSE, OWNERSHIP REPRESENTATION, MODERATION, TAKEDOWN, AND REPEAT-INFRINGEMENT PROCESS]."
+        ]
+      },
+      {
+        "heading": "Copyright, abuse, and accessibility reports",
+        "paragraphs": [
+          "Use the Privacy requests link below to report a photograph, copyright concern, abuse, or another problem to @finebykay. Include the page address and a short explanation. Please avoid sending sensitive documents in an initial message.",
+          "[COPYRIGHT/ABUSE CONTACT EMAIL]. [ASSESS DMCA SAFE-HARBOR ELIGIBILITY AND DESIGNATED-AGENT REGISTRATION IF USER CONTENT IS INTRODUCED]."
+        ]
+      },
+      {
+        "heading": "Legal terms to finalize",
+        "paragraphs": [
+          "[COUNSEL TO REVIEW CONSUMER RIGHTS, WARRANTIES, LIABILITY LIMITS, DISPUTE PROCESS, GOVERNING LAW, AND ANY MANDATORY LOCAL DISCLOSURES]. Nothing in this draft is intended to remove statutory consumer rights. [CONFIRM ACCEPTANCE AND CHANGE-NOTICE PROCESS]."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cookies",
+    "title": "Cookie Policy",
+    "sections": [
+      {
+        "heading": "Current cookies and tracking",
+        "paragraphs": [
+          "The portfolio currently uses no application cookies, analytics, advertising pixels, session replay, or third-party embeds. Fonts and images are served locally. No cookie consent banner is displayed because there are no optional tracking services to accept.",
+          "The supplied static server does not send Set-Cookie headers. [CONFIRM WHETHER YOUR HOST, PROXY, OR CDN ADDS COOKIES OR TRACKING BEFORE PUBLISHING THIS POLICY]. [COMPANY NAME], [CONTACT EMAIL], [EFFECTIVE DATE]."
+        ]
+      },
+      {
+        "heading": "External links",
+        "paragraphs": [
+          "Following an Instagram link leaves this site and may cause Instagram to use its own cookies or storage. This site does not embed Instagram or initiate a connection to it on page load."
+        ]
+      },
+      {
+        "heading": "Before optional services are added",
+        "paragraphs": [
+          "Optional analytics, advertising, replay, and other non-essential storage must remain disabled until you explicitly choose Accept for the relevant purpose. Reject must be as easy to choose as Accept. A persistent preferences control must let you withdraw consent.",
+          "[BEFORE LAUNCH, LIST EACH SERVICE, PROVIDER, PURPOSE, DATA, STORAGE KEY, LIFETIME, CONSENT CATEGORY, INTERNATIONAL TRANSFER, AND WITHDRAWAL/DELETION BEHAVIOR]. No future service is authorized by this template."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "privacy-requests",
+    "title": "Privacy requests",
+    "sections": [
+      {
+        "heading": "Request deletion or report a concern",
+        "paragraphs": [
+          "For now, message @finebykay on Instagram using the contact link below. Begin with “Privacy request”, “Delete my data”, “Copyright report”, or “Accessibility issue”, and identify the relevant conversation or page. An Instagram account is currently needed for this channel; [CONTACT EMAIL — SET UP A MONITORED NON-INSTAGRAM CHANNEL BEFORE POLICY APPROVAL].",
+          "The website has no accounts or booking database to delete. This workflow covers information you sent the studio directly, portfolio photographs, and concerns about the site. Messages held by Instagram may also require a request to Instagram under its own policies."
+        ]
+      },
+      {
+        "heading": "What to include",
+        "paragraphs": [
+          "Provide the page address or the handle you used to contact the studio and describe what you want corrected, accessed, or deleted. Do not send passwords, payment card information, health details, or identity documents in your initial request. We will request only the minimum information needed to verify your authority."
+        ]
+      },
+      {
+        "heading": "Studio handling procedure",
+        "paragraphs": [
+          "[ASSIGN REQUEST OWNER AND RESPONSE DEADLINE]. Verify control of the original contact channel, find the information in the studio’s messages and any applicable records, and delete or correct it where appropriate. Remove approved photo takedowns from the repository and published site; assess cached copies and public repository history separately.",
+          "[DOCUMENT NECESSARY RECORDKEEPING EXCEPTIONS, BACKUP EXPIRY, PROVIDER DELETION, APPEALS, AND REQUEST COMPLETION NOTICE]. A message is a request for review; this page does not claim automatic deletion or deletion of records held by third parties."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "accessibility",
+    "title": "Accessibility",
+    "sections": [
+      {
+        "heading": "Using the portfolio",
+        "paragraphs": [
+          "Use Tab to move among links and controls. The skip link moves to the main content. Carousel arrows work with a keyboard, and each photograph can open a detailed view. Escape closes the view. Zoomed photographs support arrow-key panning. Your device’s reduced-motion setting is respected."
+        ]
+      },
+      {
+        "heading": "Report a barrier",
+        "paragraphs": [
+          "If you cannot use a feature, contact @finebykay using the link below and include the page address, the action you tried, and the browser or assistive technology you used. Share only what is needed to describe the issue. [ACCESSIBILITY CONTACT EMAIL — SET UP AN ALTERNATIVE CONTACT CHANNEL]."
+        ]
+      },
+      {
+        "heading": "Review status",
+        "paragraphs": [
+          "The site is designed toward WCAG 2.1 AA. Automated checks cover selected accessibility behaviors and do not establish full conformance. [COMPLETE AND RECORD MANUAL SCREEN-READER, KEYBOARD, ZOOM, TEXT-SPACING, AND PHYSICAL-DEVICE TESTING; ADD REVIEW DATE AND KNOWN LIMITATIONS]."
+        ]
+      }
+    ]
+  }
+]

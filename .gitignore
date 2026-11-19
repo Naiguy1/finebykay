@@ -6,4 +6,16 @@ test-results/
 .env*
 !.env.example
 .DS_Store
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+id_rsa*
+id_ed25519*
+__pycache__/
+*.pyc
+*.db
+*.sqlite*
 src/data/sets.generated.json
+
