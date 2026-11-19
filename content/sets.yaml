@@ -9,6 +9,7 @@
 # Categories: Natural Nails | Structured Gel | Intricate Art
 # Copy an entire entry to add a set, give it a NEW id, and add its photo in public/media/.
 # Optional fields: high_resolution, image_position (e.g. "50% 50%"), video.
+# Videos also require captions: /media/detail.vtt and a video_description of the visuals.
 
 - id: teal-black-filigree
   name: "Butterfly wing tips"
@@ -92,7 +93,7 @@
   category: Intricate Art
   image: "/media/08_Pink_Strawberry_Floral.jpg"
   image_description: >-
-    Pink strawberry and floral nail art
+    Sheer pink nails with red strawberries, white daisies, and layered pink French tips.
   tags:
     - "Strawberry art"
     - "Floral detail"
@@ -141,7 +142,7 @@
   category: Intricate Art
   image: "/media/12_Jewel_Tone_Art.jpg"
   image_description: >-
-    Jewel tone nail art
+    Almond nails in teal, berry, amber, and green with silver swirls, starbursts, and raised accents.
   tags:
     - "Jewel tones"
     - "Custom art"
@@ -198,3 +199,4 @@
     - "Holiday botanicals"
     - "Cable-knit texture"
     - "Ribbon bows"
+

@@ -47,6 +47,7 @@ endpoint was introduced. The human deletion/reporting workflow is available on t
 | A04 / readability | Some small supporting text and no-wrap captions hindered reading/reflow | Enlarged key controls/descriptions/footer text to 12px, allowed caption wrapping, added forced-color support. Existing main headings and site composition retained. Legal text is 16px with responsive layout and no-JS/320px tests. Small decorative/eyebrow text remains; font size alone is not a WCAG AA threshold. |
 | A05 / preventive | Optional future portfolio video had no required captions/visual alternative | Build requires local VTT captions and `video_description` whenever `video` is supplied; native caption track and description rendered. No current videos. Human accuracy/audio-description review still required. |
 | A06 / manual | Automated checks cannot prove complete WCAG 2.1 AA | Added accessible help page; manual screen-reader, high zoom/text-spacing, forced-color, touch and physical-device audit remains required, especially when new interactive features launch. |
+| A07 / low | Strawberry and jewel-tone images had generic alternative text | Visually checked a contact sheet of all 15 photos and expanded these two alternatives with the visible colors, patterns and shapes. The other descriptive alternatives were retained. |
 
 ## Future launch requirements
 
