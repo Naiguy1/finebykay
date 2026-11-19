@@ -23,6 +23,7 @@ test('production licenses are permissive; tool-only exceptions are explicit', ()
     assert.ok(archive?.integrity?.startsWith('sha512-') || archive?.integrity?.startsWith('sha1-'), `Missing registry integrity: ${path}`);
     assert.ok(archive?.resolved?.startsWith('https://registry.npmjs.org/'), `Unexpected package origin: ${path}`);
     const name = path.split('node_modules/').at(-1);
+    assert.equal(typeof entry.license, 'string', `Missing license metadata: ${path}`);
     const exception = exceptions.get(name) ?? (name.startsWith('lightningcss-') ? 'MPL-2.0' : undefined);
     assert.ok(permissive.has(entry.license) || (entry.dev && entry.license === exception), `Review new license before use: ${path} (${entry.license})`);
   }

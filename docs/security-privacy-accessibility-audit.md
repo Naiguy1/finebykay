@@ -115,6 +115,11 @@ implementation, provider setup, revised notices, and a new review before product
 - GitHub baseline run 44445712849 passed clean install, full dependency audit, lint, build,
   content and production dependency audit for the unchanged lockfile. This does not
   substitute for checks on the hardening branch; see the PR's current checks for that result.
+- Hardening run [44448861821](https://github.com/Naiguy1/finebykay/actions/runs/44448861821)
+  passed all stages, including 90 browser tests (no skips), both npm audits (zero findings),
+  a scan of 265 historical blobs, and real HTTP checks under the restricted container.
+  The later production-CSP browser smoke and final revision are validated by the PR's
+  latest checks; the earlier run is retained as evidence, not substituted for them.
 - CI now also runs full fetched-history secret scanning, explicit license/origin/integrity
   checks, privacy network/storage and no-JS legal-page checks, focus/contrast checks, and
   real HTTP checks and a Chromium smoke test under the hardened production container and its actual CSP.
