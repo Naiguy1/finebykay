@@ -16,7 +16,11 @@ function text(entry, key, location, required = true) {
   const value = entry[key];
   if (value === undefined && !required) return undefined;
   if (typeof value !== 'string' || !value.trim()) fail(location, `“${key}” must contain text.`);
-  if (value.length > 4000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value)) fail(location, `“${key}” is too long or contains control characters.`);
+  const hasControl = [...value].some((character) => {
+    const code = character.charCodeAt(0);
+    return (code < 32 && ![9, 10, 13].includes(code)) || code === 127;
+  });
+  if (value.length > 4000 || hasControl) fail(location, `“${key}” is too long or contains control characters.`);
   return value.trim();
 }
 
