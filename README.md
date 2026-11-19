@@ -23,7 +23,7 @@ npm run test:e2e
 npm run preview
 ```
 
-`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers. The workflow does not deploy the site.
+`npm run build` first runs strict TypeScript checking, then outputs the site to **`dist/`**. `preview` is for inspecting that output locally, not a production server. The GitHub Actions workflow runs ESLint, the production build, and Chromium desktop/mobile and WebKit mobile browser checks for filtering, keyboard navigation, modal focus, zoom, local images, anchors, mobile menu, viewport overflow, wheel cycling, touch gesture handling, and reduced motion. It also verifies the production Docker image and HTTP security headers, and exercises the carousel/detail view and policies under the actual production CSP. The workflow does not deploy the site.
 
 ## Dependency updates and failed checks
 

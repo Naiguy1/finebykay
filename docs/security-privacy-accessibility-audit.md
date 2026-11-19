@@ -117,7 +117,7 @@ implementation, provider setup, revised notices, and a new review before product
   substitute for checks on the hardening branch; see the PR's current checks for that result.
 - CI now also runs full fetched-history secret scanning, explicit license/origin/integrity
   checks, privacy network/storage and no-JS legal-page checks, focus/contrast checks, and
-  real HTTP checks under the hardened production container runtime.
+  real HTTP checks and a Chromium smoke test under the hardened production container and its actual CSP.
 
 ## Primary guidance
 

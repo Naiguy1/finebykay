@@ -100,7 +100,8 @@ jobs:
               if docker build -t finebykay-ci . &&
                 docker run -d --name finebykay-ci --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m,mode=1777 --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 100 --memory 128m -p 127.0.0.1:8080:8080 finebykay-ci &&
                 docker exec finebykay-ci nginx -t &&
-                python3 scripts/check_static_host.py; then
+                python3 scripts/check_static_host.py &&
+                node scripts/check-production-browser.mjs; then
                 passed=1
                 break
               fi
