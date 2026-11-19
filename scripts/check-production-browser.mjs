@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import process from 'node:process';
+import { URL } from 'node:url';
 import { chromium } from '@playwright/test';
 
 // Exercise real Nginx response headers; Vite preview has no production CSP.
