@@ -33,11 +33,13 @@ Dependabot groups related packages and limits automatic npm updates to patch/min
 
 CI uses Ubuntu 24.04 with the pinned Playwright version; do not change the runner image independently of browser support. CI validates pull requests and pushes to `main`, avoiding duplicate feature-branch runs. Check the first failed stage: **installation**, **dependency audit**, **content**, **lint**, **build**, **browser installation/tests**, or **container**. The stage table distinguishes failed checks from checks that did not run; an audit failure can coexist with passing functional checks. Installation and audit output is preserved in the validation report and uploaded artifacts alongside later-stage logs.
 
-### Upstream audit blocker (November 17, 2026)
+### Picomatch advisory status (updated November 18, 2026)
 
-The full dependency audit currently reports [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf), a high-severity regular-expression denial-of-service issue in picomatch through 4.0.7. It appears through multiple build-tool dependency paths, producing 12 affected-package findings from one underlying advisory. Upstream's latest release is 4.0.7 and the advisory lists no patched version. This repair does not mark that vulnerability as fixed or substitute an unreviewed fork.
+[GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf) was withdrawn by GitHub on November 18, 2026. Its earlier audit report produced 12 affected-package findings through build-tool dependency paths; that historical report should not be treated as a newly failing installation or browser test. The [upstream discussion](https://github.com/micromatch/picomatch/pull/235#issuecomment-6986653594) also records the withdrawal.
 
-The audit step and overall validation remain failed while the advisory is unresolved. Independent content, lint, build, browser, and container checks still run when their own prerequisites pass, so their results can be assessed separately. An installation failure still prevents dependency-dependent checks. When an upstream fix is published, update the affected dependency graph, regenerate the lockfile normally, and rerun the complete validation.
+Keep the normal full `npm audit` and production audit gates enabled. Run fresh validation against the current registry data: historical failed workflow runs do not update when an advisory is withdrawn. No advisory exception, locally renamed dependency, or custom picomatch fork is required for this withdrawal. Continue to use reviewed configuration patterns rather than accepting arbitrary user-supplied glob or regular-expression patterns.
+
+Independent content, lint, build, browser, and container checks still run when their own prerequisites pass, so their results can be assessed separately. An installation failure still prevents dependency-dependent checks.
 
 ## Edit names, descriptions, and photos
 
