@@ -200,3 +200,17 @@
     - "Cable-knit texture"
     - "Ribbon bows"
 
+- id: green-gold-plaid
+  name: "Green and gold plaid"
+  description: >-
+    Deep green, crisp white, and fine gold plaid lines on sheer pink nails,
+    with small green botanical accents and ivory fabric beneath.
+  category: Intricate Art
+  image: "/media/13_Green_Gold_Plaid.png"
+  image_description: >-
+    Short sheer pink nails with deep green and white French tips, fine crossing
+    gold and white plaid lines, and small green botanical details on an ivory fabric background.
+  tags:
+    - "Green and gold"
+    - "Plaid detail"
+    - "Botanical accents"
