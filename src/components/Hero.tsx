@@ -16,6 +16,6 @@ export function Hero({ onOpen }: { onOpen: (id: string, sets: readonly Portfolio
       <Reveal delay={0.3}><MagneticLink href="#work" className="button button-burgundy">Explore the Lookbook <ArrowDown size={16} aria-hidden="true" /></MagneticLink></Reveal>
     </div>
     <HeroCarousel progress={scrollYProgress} onOpen={onOpen} />
-    <div className="hero-footnote"><span>Considered care. Tiny works of art.</span><span>Made slowly, just for you.</span></div>
+    <div className="hero-footnote"><span>Hand-painted nail art</span><span>Appointments via Instagram</span></div>
   </section>;
 }

@@ -60,13 +60,13 @@ Independent content, lint, build, browser, and container checks still run when t
 ```
 
 - **Keep `id` unchanged when renaming an existing set.** Its permanent shared address is `https://nails.bowerbanks.com/sets/botanical-gel/`. IDs use lowercase letters, numbers, and single hyphens. A new set needs a new, unique ID. Keep published entries if their shared links should continue to work.
-- `name` appears on the site and in shared previews. `description` is the short paragraph in its reveal and shared preview. The supplied descriptions are filler copy, marked in the file's comments for easy replacement.
+- `name` appears on the site and in shared previews. `description` is the short paragraph in its reveal and shared preview. Descriptions describe the visible design and can be rewritten here.
 - `image_description` describes what is actually visible for people using screen readers. Preserve the existing accurate image descriptions when editing names or filler copy.
 - Category must be **Natural Nails**, **Structured Gel**, or **Intricate Art**. Tags are optional; use `tags: []` for none.
 - Put original photos in **`public/media/`** and use `/media/filename.jpg` in the YAML. A roughly 3:4 portrait crop works well. WebP/JPEG is recommended, around 150–400KB for the grid. Preserve existing originals when adding sets.
-- Optional fields are `high_resolution: /media/photo-large.jpg`, `image_position: "50% 50%"`, and `video: /media/detail.mp4`. Videos use native controls and never autoplay. Paths with spaces may be percent-encoded (`%20`).
+- Optional fields are `lookbook_order: 1`, `high_resolution: /media/photo-large.jpg`, `image_position: "50% 50%"`, and `video: /media/detail.mp4`. Videos use native controls and never autoplay. Paths with spaces may be percent-encoded (`%20`).
 
-To add a set, copy an entry in the YAML, change its ID, update its text and photo path, then rebuild. Every published set automatically joins both the carousel and the lookbook. Saving YAML alone does not update the live site: **rebuild and redeploy** to publish. Restart the development server after editing YAML during local work.
+To add a set, copy an entry in the YAML, change its ID, update its text and photo path, then rebuild. Every published set automatically joins the carousel and keeps its shared page. Only entries with `lookbook_order` appear in the curated lookbook, sorted by that number (1 first). The current six selections use 1–6; omit the field to keep a set out of the grid. Keep order numbers positive and unique. Saving YAML alone does not update the live site: **rebuild and redeploy** to publish. Restart the development server after editing YAML during local work.
 
 ```bash
 npm run content:generate  # validates the YAML and media paths

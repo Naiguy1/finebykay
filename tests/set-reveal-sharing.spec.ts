@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { portfolio } from '../src/data/portfolio';
+import { lookbookSets, portfolio } from '../src/data/portfolio';
 
 const firstSet = portfolio[0];
 const setPath = (id: string) => `/sets/${id}/`;
@@ -46,13 +46,13 @@ test('a shared link survives reload and leads into the full lookbook', async ({ 
   await dialog.getByRole('button', { name: 'Explore more work', exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page).toHaveURL(/\/#work$/);
-  await expect(page.locator('.portfolio-card')).toHaveCount(portfolio.length);
+  await expect(page.locator('.portfolio-card')).toHaveCount(lookbookSets.length);
   expect(errors).toEqual([]);
 });
 
 test('Back closes the reveal in one step, Forward restores the last viewed set, and focus returns', async ({ page }) => {
   await page.goto('/#work');
-  const card = page.getByRole('button', { name: `View ${firstSet.title}`, exact: true });
+  const card = page.getByRole('button', { name: `View ${lookbookSets[0].title}`, exact: true });
   await card.scrollIntoViewIfNeeded();
   await card.evaluate((element) => element.addEventListener('click', () => {
     sessionStorage.setItem('scroll-at-set-open', String(scrollY));
@@ -60,17 +60,17 @@ test('Back closes the reveal in one step, Forward restores the last viewed set, 
   await card.click();
   const scrollBefore = await page.evaluate(() => Number(sessionStorage.getItem('scroll-at-set-open')));
   const dialog = page.getByRole('dialog');
-  await expect(page).toHaveURL(new RegExp(`${setPath(firstSet.id)}$`));
+  await expect(page).toHaveURL(new RegExp(`${setPath(lookbookSets[0].id)}$`));
   await dialog.getByRole('button', { name: 'Next set', exact: true }).click();
-  await expect(dialog.getByRole('heading')).toHaveText(portfolio[1].title);
-  await expect(page).toHaveURL(new RegExp(`${setPath(portfolio[1].id)}$`));
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[1].title);
+  await expect(page).toHaveURL(new RegExp(`${setPath(lookbookSets[1].id)}$`));
   await page.goBack();
   await expect(dialog).toHaveCount(0);
   await expect(page).toHaveURL(/\/#work$/);
   await expect(card).toBeFocused();
   expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore)).toBeLessThan(3);
   await page.goForward();
-  await expect(dialog.getByRole('heading')).toHaveText(portfolio[1].title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[1].title);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(page).toHaveURL(/\/#work$/);
@@ -96,9 +96,9 @@ test('native sharing receives the current set permanent link', async ({ page }) 
 test('Forward during the closing animation restores a visible photograph', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/#work');
-  await page.getByRole('button', { name: `View ${firstSet.title}`, exact: true }).click();
+  await page.getByRole('button', { name: `View ${lookbookSets[0].title}`, exact: true }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('heading')).toHaveText(firstSet.title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[0].title);
   // Respond to the closing state in the browser so a slow automation round trip
   // cannot accidentally let the whole close animation finish first.
   await page.evaluate(() => new Promise<void>((resolve) => {
@@ -112,20 +112,20 @@ test('Forward during the closing animation restores a visible photograph', async
     observer.observe(dialog, { attributes: true, attributeFilter: ['class'] });
     history.back();
   }));
-  await expect(page).toHaveURL(new RegExp(`${setPath(firstSet.id)}$`));
+  await expect(page).toHaveURL(new RegExp(`${setPath(lookbookSets[0].id)}$`));
   await expect(dialog).not.toHaveClass(/is-closing/);
   await expect(dialog.locator('.lightbox-media img')).toBeVisible();
-  await expect(dialog.getByRole('heading')).toHaveText(firstSet.title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[0].title);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
 
 test('Forward preserves a filtered collection and repeated close requests traverse once', async ({ page }) => {
-  const naturalSets = portfolio.filter((set) => set.category === 'Natural Nails');
+  const filteredSets = lookbookSets.filter((set) => set.category === 'Intricate Art');
   await page.goto('/#about');
   await page.goto('/#work');
-  await page.getByRole('button', { name: 'Natural Nails', exact: true }).click();
-  await page.getByRole('button', { name: `View ${naturalSets[0].title}`, exact: true }).click();
+  await page.getByRole('button', { name: 'Intricate Art', exact: true }).click();
+  await page.getByRole('button', { name: `View ${filteredSets[0].title}`, exact: true }).click();
   await page.getByRole('button', { name: 'Close lookbook', exact: true }).evaluate((element) => {
     (element as HTMLButtonElement).click();
     (element as HTMLButtonElement).click();
@@ -134,9 +134,9 @@ test('Forward preserves a filtered collection and repeated close requests traver
   await expect(page).toHaveURL(/\/#work$/);
   await page.goForward();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[0].title);
+  await expect(dialog.getByRole('heading')).toHaveText(filteredSets[0].title);
   await dialog.getByRole('button', { name: 'Next set', exact: true }).click();
-  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[1 % naturalSets.length].title);
+  await expect(dialog.getByRole('heading')).toHaveText(filteredSets[1 % filteredSets.length].title);
 });
 
 test('cancelling native sharing keeps the set open without copying a link', async ({ page }) => {
@@ -225,16 +225,16 @@ test('a carousel photograph opens its matching set with keyboard focus restored 
 
 test('reduced motion removes expanding image movement while preserving navigation', async ({ page }) => {
   await page.goto('/#work');
-  await page.getByRole('button', { name: `View ${firstSet.title}`, exact: true }).click();
+  await page.getByRole('button', { name: `View ${lookbookSets[0].title}`, exact: true }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('heading')).toHaveText(firstSet.title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[0].title);
   const movingTransforms = await dialog.evaluate((element) => element.getAnimations({ subtree: true }).filter((animation) => {
     const effect = animation.effect;
     return effect instanceof KeyframeEffect && Number(effect.getTiming().duration) > 100 && effect.getKeyframes().some((frame) => frame.transform && frame.transform !== 'none');
   }).length);
   expect(movingTransforms).toBe(0);
   await page.keyboard.press('ArrowRight');
-  await expect(dialog.getByRole('heading')).toHaveText(portfolio[1].title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[1].title);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
@@ -337,4 +337,22 @@ test('focused carousel photographs support arrow navigation and opening with Ent
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(nextCard).toBeFocused();
+});
+
+
+test('a set outside the curated grid keeps its shared page and full collection navigation', async ({ page }) => {
+  const index = portfolio.findIndex((set) => !lookbookSets.some((featured) => featured.id === set.id));
+  expect(index).toBeGreaterThanOrEqual(0);
+  const set = portfolio[index];
+  await page.goto(setPath(set.id));
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading')).toHaveText(set.title);
+  await page.reload();
+  await expect(dialog.getByRole('heading')).toHaveText(set.title);
+  await dialog.getByRole('button', { name: 'Next set', exact: true }).click();
+  await expect(dialog.getByRole('heading')).toHaveText(portfolio[(index + 1) % portfolio.length].title);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.portfolio-card')).toHaveCount(6);
+  await expect(page.getByRole('button', { name: `View ${set.title}`, exact: true })).toHaveCount(0);
 });

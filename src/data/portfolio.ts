@@ -14,6 +14,8 @@ export interface PortfolioSet {
   alt: string;
   tags: readonly string[];
   objectPosition?: string;
+  /** Only sets with an order appear in the curated lookbook. */
+  lookbookOrder?: number;
   /** Optional local MP4/WebM shown in the detail view, never autoplayed. */
   video?: string;
 }
@@ -21,23 +23,26 @@ export interface PortfolioSet {
 // Generated from content/sets.yaml. Edit that file, then rebuild.
 export const portfolio = sets as readonly PortfolioSet[];
 
-// Every published lookbook set joins the carousel automatically.
+// Every published set stays in the carousel, including sets outside the curated grid.
 export const heroSets = portfolio;
+
+export const lookbookSets = portfolio
+  .filter((set) => set.lookbookOrder !== undefined)
+  .sort((a, b) => a.lookbookOrder! - b.lookbookOrder!);
 
 export const studio = {
   instagram: 'https://instagram.com/finebykay',
   handle: '@finebykay',
   image: portfolio[0].image,
   imageAlt: portfolio[0].alt,
-  // Editable placeholder studio narrative. Replace with Kalisa's own introduction.
   paragraphs: [
-    'I believe getting your nails done should feel like taking a breath. A little time set aside, a thoughtful conversation, and something beautiful to carry into your everyday.',
-    'My approach starts with healthy natural nails and careful, clean preparation. From a barely-there finish to a tiny hand-painted world, every set is considered, personal, and made slowly — just for you.',
+    'I’m Kalisa, the nail artist behind finebykay. I work with natural nails, structured gel, and hand-painted designs.',
+    'Have a design in mind? Send me a photo on Instagram so we can talk about your set.',
   ],
 };
 
 export const services = [
-  { number: '01', title: 'Natural nail care', description: 'Thoughtful shaping, meticulous prep, and a soft finish. A quiet reset for your natural nails.', detail: 'Care comes first' },
-  { number: '02', title: 'Structured gel', description: 'A little strength, beautifully balanced. A tailored gel overlay to support your natural length.', detail: 'Strength, softly' },
-  { number: '03', title: 'Intricate custom art', description: 'Botanical details, considered color, and tiny worlds painted by hand. Your ideas, in miniature.', detail: 'Small-scale expression' },
+  { number: '01', title: 'Natural nail care', description: 'Shaping and preparation for your natural nails.', detail: 'Shaping & prep' },
+  { number: '02', title: 'Structured gel', description: 'A gel overlay to add support to your natural nails.', detail: 'Gel overlay' },
+  { number: '03', title: 'Intricate custom art', description: 'Hand-painted florals, patterns, characters, and custom designs.', detail: 'Hand-painted designs' },
 ] as const;

@@ -6,7 +6,7 @@ import yaml from 'js-yaml';
 export const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 export const siteOrigin = 'https://nails.bowerbanks.com';
 export const nailCategories = ['Natural Nails', 'Structured Gel', 'Intricate Art'];
-const allowedFields = new Set(['id', 'name', 'description', 'category', 'image', 'image_description', 'tags', 'high_resolution', 'image_position', 'video']);
+const allowedFields = new Set(['id', 'name', 'description', 'category', 'image', 'image_description', 'tags', 'high_resolution', 'image_position', 'video', 'lookbook_order']);
 
 function fail(location, message) {
   throw new Error(`content/sets.yaml — ${location}: ${message}`);
@@ -41,6 +41,7 @@ export function parseSets(source, { root = projectRoot, checkMedia = true } = {}
   }
   if (!Array.isArray(entries) || entries.length === 0) fail('sets', 'Add at least one set, starting with “- id:”.');
   const ids = new Set();
+  const lookbookOrders = new Set();
   return entries.map((entry, index) => {
     const location = `set ${index + 1}${typeof entry?.id === 'string' ? ` (${entry.id})` : ''}`;
     if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) fail(location, 'Each set must be a group of named fields.');
@@ -58,6 +59,13 @@ export function parseSets(source, { root = projectRoot, checkMedia = true } = {}
     const tags = entry.tags ?? [];
     if (!Array.isArray(tags) || tags.some((tag) => typeof tag !== 'string' || !tag.trim())) fail(location, '“tags” must be a list of short text labels.');
     const result = { id, title, description, category, image, alt, tags: tags.map((tag) => tag.trim()) };
+    if (entry.lookbook_order !== undefined) {
+      const order = entry.lookbook_order;
+      if (!Number.isSafeInteger(order) || order < 1) fail(location, '“lookbook_order” must be a positive whole number.');
+      if (lookbookOrders.has(order)) fail(location, 'Each “lookbook_order” must be unique.');
+      lookbookOrders.add(order);
+      result.lookbookOrder = order;
+    }
     const highRes = text(entry, 'high_resolution', location, false);
     const video = text(entry, 'video', location, false);
     const objectPosition = text(entry, 'image_position', location, false);

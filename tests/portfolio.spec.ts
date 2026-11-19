@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { portfolio } from '../src/data/portfolio';
+import { lookbookSets } from '../src/data/portfolio';
 
-const naturalSets = portfolio.filter((set) => set.category === 'Natural Nails');
+const featuredIds = ['holiday-botanicals', 'teal-black-filigree', 'jewel-tones', 'warm-backdrop', 'strawberry-floral', 'black-gold-plaid'];
 
 test('page renders local assets, anchors, and fits the viewport', async ({ page, isMobile }, testInfo) => {
   const errors: string[] = [];
@@ -11,7 +11,9 @@ test('page renders local assets, anchors, and fits the viewport', async ({ page,
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nail Art by Kalisa');
   await page.getByRole('link', { name: 'Explore the Lookbook' }).click();
   await expect(page).toHaveURL(/#work$/);
-  await expect(page.locator('.portfolio-card')).toHaveCount(portfolio.length);
+  await expect(page.locator('.portfolio-card')).toHaveCount(6);
+  expect(await page.locator('.portfolio-card').evaluateAll((cards) => cards.map((card) => card.getAttribute('data-set-id')))).toEqual(featuredIds);
+  await expect(page.getByRole('button', { name: 'View Fall patterns', exact: true })).toBeVisible();
   for (const image of await page.locator('.portfolio-card img[loading="lazy"], .about-image img[loading="lazy"]').all()) await image.scrollIntoViewIfNeeded();
   await page.locator('#contact').scrollIntoViewIfNeeded();
   await expect(page.getByRole('link', { name: 'Say hello to @finebykay' })).toHaveAttribute('href', 'https://instagram.com/finebykay');
@@ -27,9 +29,9 @@ test('page renders local assets, anchors, and fits the viewport', async ({ page,
 test('filter, keyboard lightbox navigation, zoom, focus trap and restore', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#work');
-  await page.getByRole('button', { name: 'Natural Nails', exact: true }).click();
-  await expect(page.locator('.portfolio-card')).toHaveCount(naturalSets.length);
-  const card = page.getByRole('button', { name: `View ${naturalSets[0].title}`, exact: true });
+  await page.getByRole('button', { name: 'Intricate Art', exact: true }).click();
+  await expect(page.locator('.portfolio-card')).toHaveCount(lookbookSets.length);
+  const card = page.getByRole('button', { name: `View ${lookbookSets[0].title}`, exact: true });
   await card.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -38,9 +40,9 @@ test('filter, keyboard lightbox navigation, zoom, focus trap and restore', async
   await expect(dialog.getByRole('button', { name: 'Zoom in', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(dialog.getByRole('button', { name: 'Close lookbook' })).toBeFocused();
-  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[0].title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[0].title);
   await page.keyboard.press('ArrowRight');
-  await expect(dialog.getByRole('heading')).toHaveText(naturalSets[1 % naturalSets.length].title);
+  await expect(dialog.getByRole('heading')).toHaveText(lookbookSets[1 % lookbookSets.length].title);
   await dialog.getByRole('button', { name: 'Zoom in', exact: true }).click();
   await expect(dialog.getByRole('button', { name: 'Zoom out', exact: true })).toHaveAttribute('aria-pressed', 'true');
   for (let i = 0; i < 8; i++) {

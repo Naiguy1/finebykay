@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, Plus } from 'lucide-react';
-import { categories, portfolio } from '../data/portfolio';
+import { Plus } from 'lucide-react';
+import { categories, lookbookSets } from '../data/portfolio';
 import type { Category } from '../data/portfolio';
 import type { PortfolioSet } from '../data/portfolio';
 import { Reveal } from './Motion';
@@ -10,19 +10,18 @@ export function Lookbook({ onOpen }: { onOpen: (id: string, sets: readonly Portf
   const [category, setCategory] = useState<Category>('All');
   const currentCategory = useRef<Category>('All');
   const reduced = useReducedMotion();
-  const filtered = useMemo(() => portfolio.filter((set) => category === 'All' || set.category === category), [category]);
+  const filtered = useMemo(() => lookbookSets.filter((set) => category === 'All' || set.category === category), [category]);
   return <section id="work" className="section lookbook" aria-labelledby="work-title">
-    <Reveal><div className="section-heading"><div><p className="eyebrow"><span className="eyebrow-line" />The curated lookbook</p><h2 id="work-title">Nail art, <em>one set</em><br />at a time.</h2></div><p className="section-aside">A collection of little details.<br />A reflection of you.<ArrowUpRight size={26} strokeWidth={1} aria-hidden="true" /></p></div></Reveal>
+    <Reveal><div className="section-heading"><div><p className="eyebrow"><span className="eyebrow-line" />The curated lookbook</p><h2 id="work-title">Nail art, <em>one set</em><br />at a time.</h2></div></div></Reveal>
     <Reveal><div className="filter-row" role="group" aria-label="Filter nail sets">{categories.map((item) => <button key={item} className="filter-button" aria-pressed={category === item} onClick={() => { currentCategory.current = item; setCategory(item); }}>{category === item && <motion.span className="filter-active" layoutId="category-pill" transition={{ duration: reduced ? 0 : 0.7 }} />}<span>{item}</span></button>)}</div></Reveal>
     <p className="sr-only" aria-live="polite">{filtered.length} sets shown</p>
     <motion.div className="portfolio-grid" layout={!reduced}>
       <AnimatePresence mode="popLayout" initial={false}>{filtered.map((set) => <motion.article key={set.id} layout={!reduced} initial={{ opacity: 0, y: reduced ? 0 : 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : 0.8 }}>
         <button className="portfolio-card group" aria-label={`View ${set.title}`} data-set-id={set.id} onClick={(event) => { if (currentCategory.current === 'All' || set.category === currentCategory.current) onOpen(set.id, filtered, event.currentTarget); }}>
-          <span className="portfolio-photo"><motion.img src={set.image} alt={set.alt} width="900" height="1200" loading="lazy" style={{ objectPosition: set.objectPosition }} initial={{ scale: reduced ? 1 : 1.06 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: reduced ? 0 : 1.1 }} /><span className="photo-number">0{portfolio.indexOf(set) + 1}</span><span className="photo-plus"><Plus size={22} strokeWidth={1.3} /></span></span>
+          <span className="portfolio-photo"><motion.img src={set.image} alt={set.alt} width="900" height="1200" loading="lazy" style={{ objectPosition: set.objectPosition }} initial={{ scale: reduced ? 1 : 1.06 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: reduced ? 0 : 1.1 }} /><span className="photo-number">{String(lookbookSets.indexOf(set) + 1).padStart(2, '0')}</span><span className="photo-plus"><Plus size={22} strokeWidth={1.3} /></span></span>
           <span className="portfolio-caption"><span>{set.title}</span><span>{set.category}</span></span>
         </button>
       </motion.article>)}</AnimatePresence>
     </motion.div>
-    <Reveal><p className="lookbook-note">A few possibilities, endless personal touches.<span>Every set begins with a conversation.</span></p></Reveal>
   </section>;
 }
